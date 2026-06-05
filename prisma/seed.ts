@@ -3,6 +3,7 @@ import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { SHOWCASE } from "./showcase-data.js";
+import { applyFloodlightVariants } from "./variant-demo.js";
 
 const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -376,8 +377,13 @@ async function main() {
     }
   }
 
+  // 演示用投光灯功率变体组（50W / 100W / 150W 同系列，触发「规格选择」）。
+  await applyFloodlightVariants(prisma, factory.id);
+
   console.log(
-    `Seed done — admin: admin / admin123, factory: default, products: ${products.length}`
+    `Seed done — admin: admin / admin123, factory: default, products: ${
+      products.length + 2
+    } (含 2 个投光灯变体)`
   );
 }
 

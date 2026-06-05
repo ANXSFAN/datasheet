@@ -155,6 +155,31 @@ export type RelatedItem = {
 
 export type RelatedAccessory = RelatedItem & { relation: string };
 
+export type VariantOption = {
+  id: string;
+  slug: string;
+  modelNumber: string;
+  variantLabel: string | null;
+};
+
+/**
+ * 同系列规格变体（京东式「选规格」）：同 `series`、同租户的所有型号（含当前自己）。
+ * 仅当组内 >1 个型号时才返回，单品不显示选择器。运营在后台填 variantLabel 作为
+ * 短标签（如「100W」「暖光 3000K」），未填则前台回退展示 modelNumber。
+ */
+export async function findVariants(product: {
+  factoryId: string;
+  series: string | null;
+}): Promise<VariantOption[]> {
+  if (!product.series) return [];
+  const rows = await prisma.product.findMany({
+    where: { factoryId: product.factoryId, series: product.series },
+    orderBy: [{ variantLabel: "asc" }, { modelNumber: "asc" }],
+    select: { id: true, slug: true, modelNumber: true, variantLabel: true },
+  });
+  return rows.length > 1 ? rows : [];
+}
+
 /**
  * 相关产品（同租户内）：
  * - siblings：同 `series` 的兄弟产品（零授权成本，纯聚合）

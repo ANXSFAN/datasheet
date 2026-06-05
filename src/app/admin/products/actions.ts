@@ -84,6 +84,7 @@ export async function saveProductMeta(input: {
 export async function saveProductShowcase(input: {
   productId: string;
   tagline: string;
+  variantLabel: string;
   highlights: unknown;
   detailBlocks: unknown;
 }) {
@@ -97,6 +98,7 @@ export async function saveProductShowcase(input: {
     where: { id: input.productId },
     data: {
       tagline: input.tagline.trim() || null,
+      variantLabel: input.variantLabel.trim() || null,
       highlights,
       detailBlocks,
     },

@@ -14,6 +14,9 @@
       "media": "Media",
       "certs": "Certs ·"
     },
+    "variants": {
+      "label": "规格选择"
+    },
     "figures": {
       "label": "Figures",
       "sub": "产品视觉",

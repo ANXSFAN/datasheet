@@ -34,15 +34,18 @@ const labelCls =
 export function ShowcaseEditor({
   productId,
   initialTagline,
+  initialVariantLabel,
   initialHighlights,
   initialBlocks,
 }: {
   productId: string;
   initialTagline: string;
+  initialVariantLabel: string;
   initialHighlights: Highlight[];
   initialBlocks: Block[];
 }) {
   const [tagline, setTagline] = useState(initialTagline);
+  const [variantLabel, setVariantLabel] = useState(initialVariantLabel);
   const [highlights, setHighlights] = useState<Highlight[]>(initialHighlights);
   const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
   const [pending, start] = useTransition();
@@ -108,6 +111,7 @@ export function ShowcaseEditor({
         await saveProductShowcase({
           productId,
           tagline,
+          variantLabel,
           highlights: cleanHighlights,
           detailBlocks: cleanBlocks,
         });
@@ -138,6 +142,20 @@ export function ShowcaseEditor({
           placeholder="如：IP65 防水 · 五年质保 · 高显指 Ra90"
           className={`${inputCls} mt-2`}
         />
+      </div>
+
+      {/* Variant label */}
+      <div className="mt-5">
+        <label className={labelCls}>规格变体标签</label>
+        <input
+          value={variantLabel}
+          onChange={(e) => setVariantLabel(e.target.value)}
+          placeholder="如：100W / 暖光 3000K（同款不同规格的短标签）"
+          className={`${inputCls} mt-2`}
+        />
+        <p className="mt-1.5 text-[11px] text-[var(--color-ink-faint)]">
+          仅当本产品与其它型号设了<b>相同系列（series）</b>时，公开页才会出现「规格选择」切换栏；系列在下方「关系 / 属性」区设置。
+        </p>
       </div>
 
       {/* Highlights */}

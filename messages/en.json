@@ -14,6 +14,9 @@
       "media": "Media",
       "certs": "Certs ·"
     },
+    "variants": {
+      "label": "Select variant"
+    },
     "figures": {
       "label": "Figures",
       "sub": "Product visuals",

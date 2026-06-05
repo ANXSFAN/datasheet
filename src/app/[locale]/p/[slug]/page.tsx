@@ -28,6 +28,7 @@ import { normalizeSource } from "@/lib/channel";
 import {
   findPublicProductBySlug,
   findRelatedProducts,
+  findVariants,
   parseSpecs,
   groupSpecs,
   parseHighlights,
@@ -40,6 +41,7 @@ import { ProductGallery } from "@/components/product-gallery";
 import { RelatedProducts } from "@/components/related-products";
 import { PdfDownloadLink } from "@/components/pdf-download-link";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { ShareButton } from "@/components/share-button";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
@@ -140,7 +142,10 @@ export default async function ProductDatasheetPage({
   const highlights = parseHighlights(product.highlights);
   const detailBlocks = parseDetailBlocks(product.detailBlocks);
 
-  const related = await findRelatedProducts(product);
+  const [related, variants] = await Promise.all([
+    findRelatedProducts(product),
+    findVariants(product),
+  ]);
   const hasRelated =
     related.siblings.length > 0 || related.accessories.length > 0;
 
@@ -185,6 +190,14 @@ export default async function ProductDatasheetPage({
               current={locale as AppLocale}
               supported={supportedLocales}
               slug={product.slug}
+            />
+            <ShareButton
+              locale={locale}
+              name={product.name}
+              modelNumber={product.modelNumber}
+              tagline={product.tagline ?? ""}
+              brand={brandShort}
+              coverImage={product.coverImage ?? galleryImages[0]?.url ?? null}
             />
           </div>
         </div>
@@ -243,6 +256,40 @@ export default async function ProductDatasheetPage({
                     </span>
                   ))}
               </p>
+            )}
+
+            {variants.length > 0 && (
+              <div className="mt-6 rise-in" data-step="3">
+                <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
+                  {t("variants.label")}
+                </p>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  {variants.map((v) => {
+                    const isCurrent = v.id === product.id;
+                    const vlabel = v.variantLabel ?? v.modelNumber;
+                    return isCurrent ? (
+                      <span
+                        key={v.id}
+                        aria-current="true"
+                        className="inline-flex items-center rounded-full border border-[var(--color-ink)] bg-[var(--color-ink)] px-3.5 py-1.5 text-[13px] font-medium text-[var(--color-surface)]"
+                      >
+                        {vlabel}
+                      </span>
+                    ) : (
+                      <Link
+                        key={v.id}
+                        href={getPathname({
+                          href: `/p/${v.slug}`,
+                          locale: locale as AppLocale,
+                        })}
+                        className="inline-flex items-center rounded-full border border-[var(--color-rule-strong)] px-3.5 py-1.5 text-[13px] text-[var(--color-ink-soft)] transition hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+                      >
+                        {vlabel}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             )}
 
             {product.description && (

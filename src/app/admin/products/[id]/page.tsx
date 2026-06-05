@@ -244,6 +244,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
       <ShowcaseEditor
         productId={product.id}
         initialTagline={product.tagline ?? ""}
+        initialVariantLabel={product.variantLabel ?? ""}
         initialHighlights={initialHighlights}
         initialBlocks={initialBlocks}
       />

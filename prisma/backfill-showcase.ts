@@ -5,6 +5,7 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { SHOWCASE } from "./showcase-data.js";
+import { applyFloodlightVariants } from "./variant-demo.js";
 
 const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -26,6 +27,18 @@ async function main() {
     console.log(`${res.count > 0 ? "✓" : "·（未找到）"} ${slug}`);
   }
   console.log(`Backfill done — ${updated}/${slugs.length} products updated.`);
+
+  // 投光灯变体组（演示「规格选择」）：给现有 100W 补系列、补建 50W / 150W。
+  const main = await prisma.product.findFirst({
+    where: { slug: "led-floodlight-100w" },
+    select: { factoryId: true },
+  });
+  if (main) {
+    await applyFloodlightVariants(prisma, main.factoryId);
+    console.log("✓ 投光灯变体组已写入（50W / 100W / 150W）");
+  } else {
+    console.log("· 未找到 led-floodlight-100w，跳过变体演示");
+  }
 }
 
 main()

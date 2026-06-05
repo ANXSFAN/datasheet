@@ -58,6 +58,7 @@ model Product {
   series         String?                                  // 同系列自动聚合键
   attributes     Json?                                    // { pcbWidth:"10mm", voltage:"24V", watt:14.4 } 自动匹配用
   tagline        String?                                  // 标题下卖点短语带（"·" 分隔几个短语）
+  variantLabel   String?        @map("variant_label")     // 同系列内的规格标签，如 "100W" / "暖光 3000K"
   highlights     Json?                                    // [{ icon, label, value? }] 亮点图标排
   detailBlocks   Json?          @map("detail_blocks")     // [{ kind:"heading"|"text"|"image", ... }] 京东式图文长详情
   factoryId      String         @map("factory_id")
