@@ -81,6 +81,62 @@ export function groupSpecs(specs: ProductSpec[]) {
   return groups;
 }
 
+/** 亮点图标排：京东详情页标题下的"卖点 + 图标"短排。icon 为白名单 key（见前端映射）。 */
+export type ProductHighlight = {
+  icon: string;
+  label: string;
+  value?: string;
+};
+
+/** Safe runtime parse for the Json `highlights` column. */
+export function parseHighlights(json: unknown): ProductHighlight[] {
+  if (!Array.isArray(json)) return [];
+  const out: ProductHighlight[] = [];
+  for (const raw of json) {
+    if (!raw || typeof raw !== "object") continue;
+    const r = raw as Record<string, unknown>;
+    if (typeof r.label !== "string" || !r.label.trim()) continue;
+    out.push({
+      icon: typeof r.icon === "string" ? r.icon : "dot",
+      label: r.label,
+      value:
+        typeof r.value === "string" && r.value.trim() ? r.value : undefined,
+    });
+  }
+  return out;
+}
+
+/** 京东式图文长详情的一段。image 走 URL（v1 与导入一致），text/heading 走纯文本。 */
+export type DetailBlock =
+  | { kind: "heading"; text: string }
+  | { kind: "text"; text: string }
+  | { kind: "image"; url: string; caption?: string };
+
+/** Safe runtime parse for the Json `detailBlocks` column. */
+export function parseDetailBlocks(json: unknown): DetailBlock[] {
+  if (!Array.isArray(json)) return [];
+  const out: DetailBlock[] = [];
+  for (const raw of json) {
+    if (!raw || typeof raw !== "object") continue;
+    const r = raw as Record<string, unknown>;
+    if (r.kind === "image") {
+      if (typeof r.url !== "string" || !r.url.trim()) continue;
+      out.push({
+        kind: "image",
+        url: r.url,
+        caption:
+          typeof r.caption === "string" && r.caption.trim()
+            ? r.caption
+            : undefined,
+      });
+    } else if (r.kind === "heading" || r.kind === "text") {
+      if (typeof r.text !== "string" || !r.text.trim()) continue;
+      out.push({ kind: r.kind, text: r.text });
+    }
+  }
+  return out;
+}
+
 export function siteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001").replace(
     /\/$/,

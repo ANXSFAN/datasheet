@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import { SHOWCASE } from "./showcase-data.js";
 
 const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -304,6 +305,7 @@ async function main() {
   });
 
   for (const p of products) {
+    const sc = SHOWCASE[p.slug];
     const product = await prisma.product.upsert({
       where: { slug: p.slug },
       update: {
@@ -313,6 +315,9 @@ async function main() {
         specs: p.specs,
         certifications: p.certifications,
         coverImage: p.coverImage,
+        tagline: sc?.tagline ?? null,
+        highlights: sc?.highlights ?? [],
+        detailBlocks: sc?.detailBlocks ?? [],
       },
       create: {
         slug: p.slug,
@@ -323,6 +328,9 @@ async function main() {
         specs: p.specs,
         certifications: p.certifications,
         coverImage: p.coverImage,
+        tagline: sc?.tagline ?? null,
+        highlights: sc?.highlights ?? [],
+        detailBlocks: sc?.detailBlocks ?? [],
         factoryId: factory.id,
       },
     });

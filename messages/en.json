@@ -20,6 +20,10 @@
       "captionSingle": "Photography is illustrative; final finishes vary by spec.",
       "captionMulti": "Tap a thumbnail to switch the main view."
     },
+    "detail": {
+      "label": "Detail",
+      "sub": "Product detail"
+    },
     "specifications": {
       "label": "Specifications",
       "sub": "Technical data"

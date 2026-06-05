@@ -2,11 +2,17 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { siteUrl, parseAttributes } from "@/lib/products";
+import {
+  siteUrl,
+  parseAttributes,
+  parseHighlights,
+  parseDetailBlocks,
+} from "@/lib/products";
 import { suggestAccessories } from "@/lib/matching";
 import { QrCard } from "@/components/qr-card";
 import { MaterialManager } from "@/components/material-manager";
 import { ProductRelations } from "@/components/product-relations";
+import { ShowcaseEditor } from "@/components/showcase-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +88,17 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
   );
 
   const datasheetUrl = `${siteUrl()}/p/${product.slug}`;
+
+  const initialHighlights = parseHighlights(product.highlights).map((h) => ({
+    icon: h.icon,
+    label: h.label,
+    value: h.value ?? "",
+  }));
+  const initialBlocks = parseDetailBlocks(product.detailBlocks).map((b) =>
+    b.kind === "image"
+      ? { kind: "image" as const, url: b.url, caption: b.caption ?? "" }
+      : b
+  );
 
   // 30-day buckets, days[29] = today
   const buckets = new Map<string, number>();
@@ -223,6 +240,13 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
       <div className="mt-6">
         <QrCard url={datasheetUrl} fileBase={product.modelNumber} />
       </div>
+
+      <ShowcaseEditor
+        productId={product.id}
+        initialTagline={product.tagline ?? ""}
+        initialHighlights={initialHighlights}
+        initialBlocks={initialBlocks}
+      />
 
       <ProductRelations
         productId={product.id}

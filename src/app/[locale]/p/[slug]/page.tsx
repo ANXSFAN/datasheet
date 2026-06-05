@@ -2,7 +2,24 @@ import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { ArrowUpRight, Download, ScanLine } from "lucide-react";
+import {
+  ArrowUpRight,
+  Download,
+  ScanLine,
+  ShieldCheck,
+  Droplets,
+  Zap,
+  Clock,
+  Award,
+  Sun,
+  Thermometer,
+  Ruler,
+  Gauge,
+  Lightbulb,
+  BatteryCharging,
+  Circle,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { Metadata, Viewport } from "next";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -13,7 +30,11 @@ import {
   findRelatedProducts,
   parseSpecs,
   groupSpecs,
+  parseHighlights,
+  parseDetailBlocks,
   type ProductSpec,
+  type ProductHighlight,
+  type DetailBlock,
 } from "@/lib/products";
 import { ProductGallery } from "@/components/product-gallery";
 import { RelatedProducts } from "@/components/related-products";
@@ -116,6 +137,8 @@ export default async function ProductDatasheetPage({
 
   const specs = parseSpecs(product.specs);
   const specGroups = groupSpecs(specs);
+  const highlights = parseHighlights(product.highlights);
+  const detailBlocks = parseDetailBlocks(product.detailBlocks);
 
   const related = await findRelatedProducts(product);
   const hasRelated =
@@ -201,6 +224,27 @@ export default async function ProductDatasheetPage({
               {product.modelNumber}
             </p>
 
+            {product.tagline && (
+              <p
+                className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[14px] text-[var(--color-ink-soft)] rise-in"
+                data-step="3"
+              >
+                {product.tagline
+                  .split(/[·、,，]/)
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+                  .map((phrase, i) => (
+                    <span key={i} className="inline-flex items-center gap-1.5">
+                      <span
+                        className="h-1 w-1 rounded-full bg-[var(--color-accent)]"
+                        aria-hidden
+                      />
+                      {phrase}
+                    </span>
+                  ))}
+              </p>
+            )}
+
             {product.description && (
               <div
                 className="mt-7 max-w-[44rem] space-y-3 text-[15px] leading-[1.75] text-[var(--color-ink-soft)] rise-in"
@@ -212,6 +256,17 @@ export default async function ProductDatasheetPage({
                   .map((para, i) => (
                     <p key={i}>{para.trim()}</p>
                   ))}
+              </div>
+            )}
+
+            {highlights.length > 0 && (
+              <div
+                className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 rise-in"
+                data-step="4"
+              >
+                {highlights.map((h, i) => (
+                  <HighlightCard key={i} h={h} />
+                ))}
               </div>
             )}
 
@@ -304,10 +359,22 @@ export default async function ProductDatasheetPage({
           </section>
         )}
 
-        {/* ── 02 · Specifications ──────────────────────────── */}
-        {specs.length > 0 && (
+        {/* ── 02 · Detail ──────────────────────────────────── */}
+        {detailBlocks.length > 0 && (
           <SectionBlock
             no="02"
+            label={t("detail.label")}
+            sub={t("detail.sub")}
+            count={detailBlocks.length}
+          >
+            <DetailContent blocks={detailBlocks} />
+          </SectionBlock>
+        )}
+
+        {/* ── 03 · Specifications ──────────────────────────── */}
+        {specs.length > 0 && (
+          <SectionBlock
+            no="03"
             label={t("specifications.label")}
             sub={t("specifications.sub")}
             count={specs.length}
@@ -316,10 +383,10 @@ export default async function ProductDatasheetPage({
           </SectionBlock>
         )}
 
-        {/* ── 03 · Documents ───────────────────────────────── */}
+        {/* ── 04 · Documents ───────────────────────────────── */}
         {product.documents.length > 0 && (
           <SectionBlock
-            no="03"
+            no="04"
             label={t("documents.label")}
             sub={t("documents.sub")}
             count={product.documents.length}
@@ -361,10 +428,10 @@ export default async function ProductDatasheetPage({
           </SectionBlock>
         )}
 
-        {/* ── 04 · Media ───────────────────────────────────── */}
+        {/* ── 05 · Media ───────────────────────────────────── */}
         {product.videos.length > 0 && (
           <SectionBlock
-            no="04"
+            no="05"
             label={t("media.label")}
             sub={t("media.sub")}
             count={product.videos.length}
@@ -400,12 +467,12 @@ export default async function ProductDatasheetPage({
           </SectionBlock>
         )}
 
-        {/* ── 05 · Related ─────────────────────────────────── */}
+        {/* ── 06 · Related ─────────────────────────────────── */}
         {hasRelated && (
           <section className="mt-12 grid grid-cols-1 gap-y-5 lg:mt-20 lg:grid-cols-12 lg:gap-x-10 lg:gap-y-8">
             <div className="lg:col-span-3">
               <SectionRail
-                no="05"
+                no="06"
                 label={t("related.label")}
                 sub={t("related.sub")}
                 count={related.siblings.length + related.accessories.length}
@@ -645,6 +712,93 @@ function SectionBlock({
         <ScrollReveal>{children}</ScrollReveal>
       </div>
     </section>
+  );
+}
+
+// 亮点图标白名单 → lucide 图标。数据里 icon 存 key，渲染时映射，未知回退圆点。
+const HL_ICONS: Record<string, LucideIcon> = {
+  shield: ShieldCheck,
+  droplet: Droplets,
+  zap: Zap,
+  clock: Clock,
+  award: Award,
+  sun: Sun,
+  temp: Thermometer,
+  ruler: Ruler,
+  gauge: Gauge,
+  bulb: Lightbulb,
+  battery: BatteryCharging,
+  dot: Circle,
+};
+
+function HighlightCard({ h }: { h: ProductHighlight }) {
+  const Icon = HL_ICONS[h.icon] ?? Circle;
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-[var(--color-rule)] bg-[var(--color-surface-sunken)] p-3.5">
+      <Icon
+        className="h-5 w-5 shrink-0 text-[var(--color-accent)]"
+        strokeWidth={1.5}
+      />
+      <div className="min-w-0">
+        {h.value && (
+          <p className="font-mono text-[14px] font-medium tabular-nums leading-tight text-[var(--color-ink)]">
+            {h.value}
+          </p>
+        )}
+        <p className="mt-0.5 text-[12px] leading-snug text-[var(--color-ink-soft)]">
+          {h.label}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// 京东式图文长详情：标题 / 段落 / 整幅大图依序铺陈。图片走 URL，懒加载。
+function DetailContent({ blocks }: { blocks: DetailBlock[] }) {
+  return (
+    <div className="space-y-6">
+      {blocks.map((b, i) => {
+        if (b.kind === "heading") {
+          return (
+            <h3
+              key={i}
+              className="headline-lg pt-2 text-[22px] leading-tight text-[var(--color-ink)] sm:text-[26px]"
+            >
+              {b.text}
+            </h3>
+          );
+        }
+        if (b.kind === "text") {
+          return (
+            <p
+              key={i}
+              className="max-w-[46rem] whitespace-pre-line text-[15px] leading-[1.8] text-[var(--color-ink-soft)]"
+            >
+              {b.text}
+            </p>
+          );
+        }
+        return (
+          <figure
+            key={i}
+            className="overflow-hidden rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface-sunken)]"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={b.url}
+              alt={b.caption ?? ""}
+              loading="lazy"
+              className="h-auto w-full object-cover"
+            />
+            {b.caption && (
+              <figcaption className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ink-muted)]">
+                {b.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
+      })}
+    </div>
   );
 }
 

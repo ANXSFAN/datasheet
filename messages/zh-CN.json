@@ -20,6 +20,10 @@
       "captionSingle": "Photography is illustrative; final finishes vary by spec.",
       "captionMulti": "点击缩略图切换主图。"
     },
+    "detail": {
+      "label": "Detail",
+      "sub": "产品详情"
+    },
     "specifications": {
       "label": "Specifications",
       "sub": "技术规格"

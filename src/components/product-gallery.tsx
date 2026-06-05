@@ -173,6 +173,7 @@ function Lightbox({
   const total = images.length;
   const [zoomed, setZoomed] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const dragging = useRef(false);
   const last = useRef({ x: 0, y: 0 });
   const touchStartX = useRef<number | null>(null);
@@ -213,6 +214,7 @@ function Lightbox({
   function onPointerDown(e: React.PointerEvent) {
     if (!zoomed) return;
     dragging.current = true;
+    setIsDragging(true);
     last.current = { x: e.clientX, y: e.clientY };
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
   }
@@ -225,6 +227,7 @@ function Lightbox({
   }
   function onPointerUp() {
     dragging.current = false;
+    setIsDragging(false);
   }
 
   // 未缩放时支持左右滑动切图
@@ -295,7 +298,7 @@ function Lightbox({
           onTouchEnd={onTouchEnd}
           style={{
             transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoomed ? 2.5 : 1})`,
-            transition: dragging.current ? "none" : "transform 0.25s ease",
+            transition: isDragging ? "none" : "transform 0.25s ease",
           }}
           className={`max-h-full max-w-full touch-pan-y select-none object-contain ${
             zoomed ? "cursor-grab" : "cursor-zoom-in"

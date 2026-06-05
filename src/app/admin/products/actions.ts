@@ -5,7 +5,11 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
 import { isCategory } from "@/lib/matching";
-import type { ProductAttributes } from "@/lib/products";
+import {
+  parseHighlights,
+  parseDetailBlocks,
+  type ProductAttributes,
+} from "@/lib/products";
 
 type Relation = "accessory" | "alternative";
 
@@ -66,6 +70,35 @@ export async function saveProductMeta(input: {
       series: input.series.trim() || null,
       // 空对象代表"无属性"，parseAttributes 一致回退到 {}
       attributes: attrs,
+    },
+  });
+
+  revalidatePath(`/admin/products/${input.productId}`);
+}
+
+/**
+ * 保存产品展示内容：卖点短语带 / 亮点图标排 / 京东式图文长详情。
+ * 这些是资料站独有字段，不来自主站同步，不会被 sync 覆盖。
+ * highlights / detailBlocks 经 parse 清洗，非法项静默丢弃；空集合存 [] 表示"无"。
+ */
+export async function saveProductShowcase(input: {
+  productId: string;
+  tagline: string;
+  highlights: unknown;
+  detailBlocks: unknown;
+}) {
+  const factory = await authedFactory();
+  await assertOwned(input.productId, factory.id);
+
+  const highlights = parseHighlights(input.highlights);
+  const detailBlocks = parseDetailBlocks(input.detailBlocks);
+
+  await prisma.product.update({
+    where: { id: input.productId },
+    data: {
+      tagline: input.tagline.trim() || null,
+      highlights,
+      detailBlocks,
     },
   });
 
