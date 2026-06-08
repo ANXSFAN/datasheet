@@ -45,6 +45,7 @@ import {
   parseContentI18n,
   buildSpecViz,
   parseCct,
+  parseBeam,
   lookupCert,
   type ProductSpec,
   type ProductHighlight,
@@ -58,6 +59,7 @@ import {
   type SpecVizItem,
   type Dimensions,
   type Cct,
+  type Beam,
 } from "@/lib/products";
 import { ProductGallery } from "@/components/product-gallery";
 import { RelatedProducts } from "@/components/related-products";
@@ -176,6 +178,9 @@ export default async function ProductDatasheetPage({
   );
   // 色温刻度：用展示用 specs 解析，标题随语言；无色温的产品不渲染。
   const cct = parseCct(displaySpecs);
+  // 配光示意：能干净抽出角度才画（对称锥 / 双轴光斑）；画了就把 viz 里的徽章去掉防重复。
+  const beam = parseBeam(displaySpecs);
+  const specVizItems = beam ? specViz.filter((v) => v.icon !== "ruler") : specViz;
   const name = tr?.name || product.name;
   const description = tr?.description || product.description;
   const tagline = tr?.tagline || product.tagline;
@@ -423,15 +428,18 @@ export default async function ProductDatasheetPage({
           </SectionBlock>
         )}
 
-        {/* ── 02 · Performance (spec viz) ──────────────────── */}
-        {specViz.length > 0 && (
+        {/* ── 02 · Performance (spec viz + 配光示意) ───────── */}
+        {(specVizItems.length > 0 || beam) && (
           <SectionBlock
             no="02"
             label={t("performance.label")}
             sub={t("performance.sub")}
-            count={specViz.length}
+            count={specVizItems.length + (beam ? 1 : 0)}
           >
-            <SpecVizGrid items={specViz} />
+            <div className="space-y-3">
+              {beam && <BeamDiagram beam={beam} />}
+              {specVizItems.length > 0 && <SpecVizGrid items={specVizItems} />}
+            </div>
           </SectionBlock>
         )}
 
@@ -1347,6 +1355,182 @@ function BoxList({ items, note }: { items: BoxItem[]; note: string }) {
         ))}
       </ul>
       <p className="mt-4 text-[11px] text-[var(--color-ink-faint)]">{note}</p>
+    </div>
+  );
+}
+
+// 配光示意：对称角画侧视光锥（多挡并排），双轴非对称画俯视光斑椭圆。全部按真实角度现画。
+function BeamDiagram({ beam }: { beam: Beam }) {
+  return (
+    <div className="rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface-sunken)] p-5 sm:p-6">
+      <div className="mb-4 flex items-center gap-3">
+        <span
+          className="h-2 w-2 shrink-0 rounded-full bg-[var(--color-accent)]"
+          aria-hidden
+        />
+        <span className="text-[15px] font-semibold text-[var(--color-ink)]">
+          {beam.label}
+        </span>
+        <span className="ml-auto font-mono text-[13px] tabular-nums text-[var(--color-ink-soft)]">
+          {beam.display}
+        </span>
+      </div>
+      {beam.mode === "cone" ? (
+        <div
+          className={
+            beam.angles.length === 1
+              ? "max-w-[150px]"
+              : "grid grid-cols-2 gap-3 sm:grid-cols-4"
+          }
+        >
+          {beam.angles.map((a) => (
+            <BeamCone key={a} angle={a} />
+          ))}
+        </div>
+      ) : (
+        <BeamFootprint major={beam.major} minor={beam.minor} />
+      )}
+    </div>
+  );
+}
+
+// 侧视光锥：灯具在顶、光向下散开。锥的张角按真实角度画（窄角细高、宽角矮胖），下方标角度。
+function BeamCone({ angle }: { angle: number }) {
+  const VB = 110;
+  const VH = 92;
+  const cx = VB / 2;
+  const maxH = 60;
+  const maxHalfW = 40;
+  const fixtureH = 6;
+  const clamped = Math.min(Math.max(angle, 5), 170);
+  const tan = Math.tan((clamped / 2) * (Math.PI / 180));
+  let H = maxH;
+  let dx = maxH * tan;
+  if (dx > maxHalfW) {
+    dx = maxHalfW;
+    H = maxHalfW / tan;
+  }
+  const apexY = (VH - (H + fixtureH)) / 2 + fixtureH;
+  const floorY = apexY + H;
+  const lx = cx - dx;
+  const rx = cx + dx;
+  const accent = "var(--color-accent)";
+  return (
+    <div className="flex flex-col items-center gap-1.5 rounded-xl bg-[var(--color-surface)] p-3">
+      <svg
+        viewBox={`0 0 ${VB} ${VH}`}
+        className="w-full max-w-[120px]"
+        role="img"
+        aria-label={`${angle}°`}
+      >
+        <polygon
+          points={`${cx},${apexY} ${lx},${floorY} ${rx},${floorY}`}
+          fill={accent}
+          fillOpacity="0.12"
+          stroke={accent}
+          strokeWidth="1.3"
+          strokeLinejoin="round"
+        />
+        <rect
+          x={cx - 9}
+          y={apexY - fixtureH}
+          width="18"
+          height={fixtureH}
+          rx="1.5"
+          fill="var(--color-ink)"
+        />
+        <line
+          x1={lx - 6}
+          y1={floorY}
+          x2={rx + 6}
+          y2={floorY}
+          stroke="var(--color-rule-strong)"
+          strokeWidth="1"
+          strokeDasharray="2 3"
+        />
+      </svg>
+      <span className="font-mono text-[16px] font-semibold tabular-nums text-[var(--color-ink)]">
+        {angle}°
+      </span>
+    </div>
+  );
+}
+
+// 俯视光斑（双轴非对称 / 路面配光）：椭圆按长短轴角度比例画，长轴标 major、短轴标 minor。
+function BeamFootprint({ major, minor }: { major: number; minor: number }) {
+  const VB = 240;
+  const VH = 132;
+  const cx = VB / 2;
+  const cy = VH / 2;
+  const maxRx = 86;
+  const maxRy = 42;
+  const tMaj = Math.tan((Math.min(major, 170) / 2) * (Math.PI / 180));
+  const tMin = Math.tan((Math.min(minor, 170) / 2) * (Math.PI / 180));
+  const scale = Math.min(maxRx / tMaj, maxRy / tMin);
+  const rx = tMaj * scale;
+  const ry = tMin * scale;
+  const accent = "var(--color-accent)";
+  const rule = "var(--color-rule-strong)";
+  return (
+    <div className="flex justify-center rounded-xl bg-[var(--color-surface)] p-4">
+      <svg
+        viewBox={`0 0 ${VB} ${VH}`}
+        className="w-full max-w-[280px]"
+        role="img"
+        aria-label={`${major}° × ${minor}°`}
+      >
+        <ellipse
+          cx={cx}
+          cy={cy}
+          rx={rx}
+          ry={ry}
+          fill={accent}
+          fillOpacity="0.1"
+          stroke={accent}
+          strokeWidth="1.3"
+        />
+        <line
+          x1={cx - rx}
+          y1={cy}
+          x2={cx + rx}
+          y2={cy}
+          stroke={rule}
+          strokeWidth="1"
+          strokeDasharray="2 3"
+        />
+        <line
+          x1={cx}
+          y1={cy - ry}
+          x2={cx}
+          y2={cy + ry}
+          stroke={rule}
+          strokeWidth="1"
+          strokeDasharray="2 3"
+        />
+        <circle cx={cx} cy={cy} r="3" fill="var(--color-ink)" />
+        <text
+          x={cx}
+          y={VH - 5}
+          textAnchor="middle"
+          fontFamily="monospace"
+          fontSize="13"
+          fontWeight="600"
+          fill="var(--color-ink)"
+        >
+          {major}°
+        </text>
+        <text
+          x={cx + rx + 10}
+          y={cy + 4}
+          textAnchor="start"
+          fontFamily="monospace"
+          fontSize="13"
+          fontWeight="600"
+          fill="var(--color-ink)"
+        >
+          {minor}°
+        </text>
+      </svg>
     </div>
   );
 }

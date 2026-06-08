@@ -339,6 +339,63 @@ export function parseCct(specs: ProductSpec[]): Cct | null {
   return null;
 }
 
+/**
+ * 配光（光束角）。两种可画模式：
+ * - cone：对称角，画侧视光锥；angles 多个=多挡可选（selectable）。
+ * - asymmetric：双轴非对称（如 140×60 路面配光），画俯视光斑椭圆，major/minor 为长短轴角度。
+ */
+export type Beam =
+  | { mode: "cone"; angles: number[]; display: string; label: string; selectable: boolean }
+  | { mode: "asymmetric"; major: number; minor: number; display: string; label: string };
+
+/**
+ * 从 specs 解析光束角，用于「配光示意图」。保守且零编造：
+ * - 命中规则：标题含 光束/配光/beam/apertura，或单位是 °（排除 °C/°F 温度）。
+ * - "140 × 60"（双轴非对称/路面配光）→ asymmetric 模式，俯视光斑。
+ * - 单角度→一个锥；"90 / 120 (可选)" 等→多挡可选锥（cone 模式）。
+ * - 命名配光（蝙蝠翼 / Type III）或无干净角度 → 返回 null，留规格表/徽章兜底。
+ * 传 displaySpecs 进来可让标题/取值跟随当前语言。
+ */
+export function parseBeam(specs: ProductSpec[]): Beam | null {
+  const inRange = (n: number) => n >= 5 && n <= 180;
+  for (const s of specs) {
+    const unit = s.unit ?? "";
+    const unitIsAngle = /°|deg|grado/i.test(unit) && !/[℃℉]|°\s*[CF]\b/i.test(unit);
+    const isBeam = /光束|配光|beam|apertura|óptica|optica/i.test(s.label) || unitIsAngle;
+    if (!isBeam) continue;
+    const raw = `${s.value}`;
+    const display = unit ? `${s.value} ${unit}` : s.value;
+    // 双轴非对称（140 × 60）
+    const asym = raw.match(/(\d{1,3})\s*[×x*]\s*(\d{1,3})/i);
+    if (asym) {
+      const a = Number(asym[1]);
+      const b = Number(asym[2]);
+      if (inRange(a) && inRange(b)) {
+        return {
+          mode: "asymmetric",
+          major: Math.max(a, b),
+          minor: Math.min(a, b),
+          display,
+          label: s.label,
+        };
+      }
+      return null;
+    }
+    const angles = [
+      ...new Set((raw.match(/\d{1,3}/g) ?? []).map(Number).filter(inRange)),
+    ];
+    if (angles.length === 0) continue; // 命名配光/无角度
+    return {
+      mode: "cone",
+      angles: angles.slice(0, 4),
+      display,
+      label: s.label,
+      selectable: /可选|optional|seleccionable|\/|,|，/i.test(raw),
+    };
+  }
+  return null;
+}
+
 /** 产品尺寸（从 specs 解析）：w×h 为正面，d 为厚度，cutout 为开孔说明。 */
 export type Dimensions = {
   w: number;
