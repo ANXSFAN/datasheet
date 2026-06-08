@@ -1394,140 +1394,116 @@ function BeamDiagram({ beam }: { beam: Beam }) {
   );
 }
 
-// 侧视光锥：灯具在顶、光向下散开。锥的张角按真实角度画（窄角细高、宽角矮胖），下方标角度。
+// 侧视光锥（透视，柔和灰）：精致筒灯符号 → 渐变光束自然衰减 → 透视落地光斑。窄角细高、宽角矮胖。
 function BeamCone({ angle }: { angle: number }) {
-  const VB = 110;
-  const VH = 92;
+  const VB = 132;
+  const VH = 124;
   const cx = VB / 2;
-  const maxH = 60;
-  const maxHalfW = 40;
-  const fixtureH = 6;
+  const lampY = 30;
+  const groundY = 100;
+  const H = groundY - lampY;
+  const maxHalfW = 48;
   const clamped = Math.min(Math.max(angle, 5), 170);
   const tan = Math.tan((clamped / 2) * (Math.PI / 180));
-  let H = maxH;
-  let dx = maxH * tan;
-  if (dx > maxHalfW) {
-    dx = maxHalfW;
-    H = maxHalfW / tan;
-  }
-  const apexY = (VH - (H + fixtureH)) / 2 + fixtureH;
-  const floorY = apexY + H;
+  const dx = Math.min(H * tan, maxHalfW);
+  const ry = Math.max(3, dx * 0.22);
   const lx = cx - dx;
   const rx = cx + dx;
-  const accent = "var(--color-accent)";
+  const ink = "var(--color-ink)";
+  const gid = `bc${angle}`;
   return (
-    <div className="flex flex-col items-center gap-1.5 rounded-xl bg-[var(--color-surface)] p-3">
+    <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] px-3 py-5">
       <svg
         viewBox={`0 0 ${VB} ${VH}`}
-        className="w-full max-w-[120px]"
+        className="w-full max-w-[132px]"
         role="img"
         aria-label={`${angle}°`}
       >
-        <polygon
-          points={`${cx},${apexY} ${lx},${floorY} ${rx},${floorY}`}
-          fill={accent}
-          fillOpacity="0.12"
-          stroke={accent}
-          strokeWidth="1.3"
-          strokeLinejoin="round"
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={ink} stopOpacity="0.18" />
+            <stop offset="72%" stopColor={ink} stopOpacity="0.04" />
+            <stop offset="100%" stopColor={ink} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {/* 柔和光束：无硬描边，靠渐变自然衰减 */}
+        <path
+          d={`M ${cx} ${lampY} L ${lx} ${groundY} A ${dx} ${ry} 0 0 0 ${rx} ${groundY} Z`}
+          fill={`url(#${gid})`}
         />
-        <rect
-          x={cx - 9}
-          y={apexY - fixtureH}
-          width="18"
-          height={fixtureH}
-          rx="1.5"
-          fill="var(--color-ink)"
+        {/* 极淡的边导引线 */}
+        <line x1={cx} y1={lampY} x2={lx} y2={groundY} stroke={ink} strokeWidth="0.75" strokeOpacity="0.28" />
+        <line x1={cx} y1={lampY} x2={rx} y2={groundY} stroke={ink} strokeWidth="0.75" strokeOpacity="0.28" />
+        {/* 透视落地光斑（前缘实、背缘虚） */}
+        <path d={`M ${lx} ${groundY} A ${dx} ${ry} 0 0 0 ${rx} ${groundY}`} fill="none" stroke={ink} strokeWidth="0.9" strokeOpacity="0.5" />
+        <path d={`M ${lx} ${groundY} A ${dx} ${ry} 0 0 1 ${rx} ${groundY}`} fill="none" stroke={ink} strokeWidth="0.8" strokeOpacity="0.22" strokeDasharray="2 2.5" />
+        {/* 精致筒灯符号：吸顶条 + 反射杯 */}
+        <rect x={cx - 11} y={lampY - 13} width="22" height="3.5" rx="1.75" fill={ink} />
+        <path
+          d={`M ${cx - 8} ${lampY - 9} L ${cx + 8} ${lampY - 9} L ${cx + 4.5} ${lampY} L ${cx - 4.5} ${lampY} Z`}
+          fill={ink}
         />
-        <line
-          x1={lx - 6}
-          y1={floorY}
-          x2={rx + 6}
-          y2={floorY}
-          stroke="var(--color-rule-strong)"
-          strokeWidth="1"
-          strokeDasharray="2 3"
-        />
+        <circle cx={cx} cy={lampY - 1.5} r="1.6" fill="var(--color-surface)" />
       </svg>
-      <span className="font-mono text-[16px] font-semibold tabular-nums text-[var(--color-ink)]">
+      <span className="font-mono text-[15px] font-semibold tabular-nums text-[var(--color-ink)]">
         {angle}°
       </span>
     </div>
   );
 }
 
-// 俯视光斑（双轴非对称 / 路面配光）：椭圆按长短轴角度比例画，长轴标 major、短轴标 minor。
+// 俯视光斑（双轴非对称 / 路面配光，柔和灰）：径向渐变光池 + 长短轴工程标注（端点刻度），各标真实角度。
 function BeamFootprint({ major, minor }: { major: number; minor: number }) {
-  const VB = 240;
-  const VH = 132;
-  const cx = VB / 2;
-  const cy = VH / 2;
-  const maxRx = 86;
-  const maxRy = 42;
+  const VB = 280;
+  const VH = 152;
+  const cx = 140;
+  const cy = 60;
+  const maxRx = 84;
+  const maxRy = 34;
   const tMaj = Math.tan((Math.min(major, 170) / 2) * (Math.PI / 180));
   const tMin = Math.tan((Math.min(minor, 170) / 2) * (Math.PI / 180));
   const scale = Math.min(maxRx / tMaj, maxRy / tMin);
   const rx = tMaj * scale;
   const ry = tMin * scale;
-  const accent = "var(--color-accent)";
-  const rule = "var(--color-rule-strong)";
+  const ink = "var(--color-ink)";
+  const dimY = cy + maxRy + 24;
+  const dimX = cx + maxRx + 26;
   return (
-    <div className="flex justify-center rounded-xl bg-[var(--color-surface)] p-4">
+    <div className="flex justify-center rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] px-3 py-5">
       <svg
         viewBox={`0 0 ${VB} ${VH}`}
-        className="w-full max-w-[280px]"
+        className="w-full max-w-[300px]"
         role="img"
         aria-label={`${major}° × ${minor}°`}
       >
-        <ellipse
-          cx={cx}
-          cy={cy}
-          rx={rx}
-          ry={ry}
-          fill={accent}
-          fillOpacity="0.1"
-          stroke={accent}
-          strokeWidth="1.3"
-        />
-        <line
-          x1={cx - rx}
-          y1={cy}
-          x2={cx + rx}
-          y2={cy}
-          stroke={rule}
-          strokeWidth="1"
-          strokeDasharray="2 3"
-        />
-        <line
-          x1={cx}
-          y1={cy - ry}
-          x2={cx}
-          y2={cy + ry}
-          stroke={rule}
-          strokeWidth="1"
-          strokeDasharray="2 3"
-        />
-        <circle cx={cx} cy={cy} r="3" fill="var(--color-ink)" />
-        <text
-          x={cx}
-          y={VH - 5}
-          textAnchor="middle"
-          fontFamily="monospace"
-          fontSize="13"
-          fontWeight="600"
-          fill="var(--color-ink)"
-        >
+        <defs>
+          <radialGradient id="bfg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={ink} stopOpacity="0.2" />
+            <stop offset="70%" stopColor={ink} stopOpacity="0.05" />
+            <stop offset="100%" stopColor={ink} stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        {/* 光池 */}
+        <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="url(#bfg)" />
+        <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="none" stroke={ink} strokeWidth="0.9" strokeOpacity="0.5" />
+        <ellipse cx={cx} cy={cy} rx={rx * 0.58} ry={ry * 0.58} fill="none" stroke={ink} strokeWidth="0.75" strokeOpacity="0.22" strokeDasharray="2 2.5" />
+        <circle cx={cx} cy={cy} r="2.4" fill={ink} />
+        {/* 长轴标注（横向 = major） */}
+        <g stroke={ink} strokeWidth="0.9" strokeOpacity="0.55">
+          <line x1={cx - rx} y1={dimY} x2={cx + rx} y2={dimY} />
+          <line x1={cx - rx} y1={dimY - 4} x2={cx - rx} y2={dimY + 4} />
+          <line x1={cx + rx} y1={dimY - 4} x2={cx + rx} y2={dimY + 4} />
+        </g>
+        <text x={cx} y={dimY + 17} textAnchor="middle" fontFamily="monospace" fontSize="13" fontWeight="600" fill={ink}>
           {major}°
         </text>
-        <text
-          x={cx + rx + 10}
-          y={cy + 4}
-          textAnchor="start"
-          fontFamily="monospace"
-          fontSize="13"
-          fontWeight="600"
-          fill="var(--color-ink)"
-        >
+        {/* 短轴标注（纵向 = minor） */}
+        <g stroke={ink} strokeWidth="0.9" strokeOpacity="0.55">
+          <line x1={dimX} y1={cy - ry} x2={dimX} y2={cy + ry} />
+          <line x1={dimX - 4} y1={cy - ry} x2={dimX + 4} y2={cy - ry} />
+          <line x1={dimX - 4} y1={cy + ry} x2={dimX + 4} y2={cy + ry} />
+        </g>
+        <text x={dimX + 7} y={cy + 4} textAnchor="start" fontFamily="monospace" fontSize="13" fontWeight="600" fill={ink}>
           {minor}°
         </text>
       </svg>
