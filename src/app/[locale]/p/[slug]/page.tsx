@@ -1453,23 +1453,25 @@ function BeamScale({ angle }: { angle: number }) {
 
 // 侧视光锥：暖光渐变光束（accent 色，像真的灯光而非剪贴图标）→ 落地光池晕开 → 透视光斑 → 精致筒灯。窄角细高、宽角矮胖。
 function BeamCone({ angle, hero = false }: { angle: number; hero?: boolean }) {
-  const VB = 132;
-  const VH = 120;
+  const VB = 148;
+  const VH = 132;
   const cx = VB / 2;
-  const lampY = 26;
-  const groundY = 96;
-  const H = groundY - lampY;
-  const maxHalfW = 46;
+  const apexY = 26;
+  const L = 72; // 斜边（投射距离）恒定 → 不同角度真实可比，不再被宽度上限压成一样
+  const maxHalfW = 70;
   const clamped = Math.min(Math.max(angle, 5), 170);
-  const tan = Math.tan((clamped / 2) * (Math.PI / 180));
-  const dx = Math.min(H * tan, maxHalfW);
-  const ry = Math.max(3, dx * 0.24);
-  const lx = cx - dx;
-  const rx = cx + dx;
+  const half = (clamped / 2) * (Math.PI / 180);
+  const ex = Math.min(L * Math.sin(half), maxHalfW); // 水平半张开（按真实半角）
+  const ey = L * Math.cos(half); // 垂直深度（窄角更深、宽角更浅）
+  const endY = apexY + ey;
+  const ry = Math.max(4, ex * 0.28); // 落地椭圆透视短半轴
+  const lx = cx - ex;
+  const rx = cx + ex;
   const accent = "var(--color-accent)";
   const ink = "var(--color-ink)";
   const gid = `bcg${angle}`;
   const pid = `bcp${angle}`;
+  const hid = `bch${angle}`;
   return (
     <div
       className={
@@ -1480,41 +1482,66 @@ function BeamCone({ angle, hero = false }: { angle: number; hero?: boolean }) {
     >
       <svg
         viewBox={`0 0 ${VB} ${VH}`}
-        className={hero ? "w-full max-w-[150px]" : "w-full max-w-[120px]"}
+        className={hero ? "w-full max-w-[160px]" : "w-full max-w-[128px]"}
         role="img"
         aria-label={`${angle}°`}
       >
         <defs>
           <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.34" />
-            <stop offset="68%" stopColor={accent} stopOpacity="0.08" />
+            <stop offset="0%" stopColor={accent} stopOpacity="0.30" />
+            <stop offset="60%" stopColor={accent} stopOpacity="0.07" />
+            <stop offset="100%" stopColor={accent} stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id={`bcc${angle}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={accent} stopOpacity="0.55" />
+            <stop offset="55%" stopColor={accent} stopOpacity="0.12" />
             <stop offset="100%" stopColor={accent} stopOpacity="0" />
           </linearGradient>
           <radialGradient id={pid} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.28" />
+            <stop offset="0%" stopColor={accent} stopOpacity="0.16" />
             <stop offset="100%" stopColor={accent} stopOpacity="0" />
           </radialGradient>
+          <radialGradient id={hid} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={accent} stopOpacity="0.6" />
+            <stop offset="100%" stopColor={accent} stopOpacity="0" />
+          </radialGradient>
+          <filter id={`bcf${angle}`} x="-40%" y="-25%" width="180%" height="150%">
+            <feGaussianBlur stdDeviation="3" />
+          </filter>
+          <filter id={`bck${angle}`} x="-40%" y="-25%" width="180%" height="150%">
+            <feGaussianBlur stdDeviation="1.4" />
+          </filter>
         </defs>
-        {/* 落地光池：暖光晕开 */}
-        <ellipse cx={cx} cy={groundY} rx={dx} ry={ry} fill={`url(#${pid})`} />
-        {/* 暖光光束：靠渐变自然衰减 */}
+        {/* 柔光晕：模糊外发光，让光束像真的灯光而非几何楔形 */}
         <path
-          d={`M ${cx} ${lampY} L ${lx} ${groundY} A ${dx} ${ry} 0 0 0 ${rx} ${groundY} Z`}
+          d={`M ${cx} ${apexY} L ${lx} ${endY} A ${ex} ${ry} 0 0 0 ${rx} ${endY} Z`}
+          fill={accent}
+          fillOpacity="0.1"
+          filter={`url(#bcf${angle})`}
+        />
+        {/* 光束本体：渐变自然衰减 */}
+        <path
+          d={`M ${cx} ${apexY} L ${lx} ${endY} A ${ex} ${ry} 0 0 0 ${rx} ${endY} Z`}
           fill={`url(#${gid})`}
         />
-        {/* 束缘导引线（暖光淡描边） */}
-        <line x1={cx} y1={lampY} x2={lx} y2={groundY} stroke={accent} strokeWidth="0.9" strokeOpacity="0.5" />
-        <line x1={cx} y1={lampY} x2={rx} y2={groundY} stroke={accent} strokeWidth="0.9" strokeOpacity="0.5" />
-        {/* 透视落地光斑（前缘实、背缘虚） */}
-        <path d={`M ${lx} ${groundY} A ${dx} ${ry} 0 0 0 ${rx} ${groundY}`} fill="none" stroke={accent} strokeWidth="1" strokeOpacity="0.65" />
-        <path d={`M ${lx} ${groundY} A ${dx} ${ry} 0 0 1 ${rx} ${groundY}`} fill="none" stroke={accent} strokeWidth="0.9" strokeOpacity="0.28" strokeDasharray="2 2.5" />
-        {/* 精致筒灯符号：吸顶板 + 反射杯 + 暖芯 */}
-        <rect x={cx - 11} y={lampY - 12} width="22" height="3.5" rx="1.75" fill={ink} />
+        {/* 中央热芯：更亮的窄束，强化"发光"体感 */}
         <path
-          d={`M ${cx - 8} ${lampY - 8} L ${cx + 8} ${lampY - 8} L ${cx + 4.5} ${lampY} L ${cx - 4.5} ${lampY} Z`}
-          fill={ink}
+          d={`M ${cx} ${apexY} L ${cx - ex * 0.4} ${endY} A ${ex * 0.4} ${ry * 0.4} 0 0 0 ${cx + ex * 0.4} ${endY} Z`}
+          fill={`url(#bcc${angle})`}
+          filter={`url(#bck${angle})`}
         />
-        <circle cx={cx} cy={lampY - 1} r="1.7" fill={accent} />
+        {/* 极淡束缘 */}
+        <line x1={cx} y1={apexY} x2={lx} y2={endY} stroke={accent} strokeWidth="0.7" strokeOpacity="0.22" />
+        <line x1={cx} y1={apexY} x2={rx} y2={endY} stroke={accent} strokeWidth="0.7" strokeOpacity="0.22" />
+        {/* 落地光斑：极淡光池 + 前缘实 / 背缘虚 */}
+        <ellipse cx={cx} cy={endY} rx={ex * 0.92} ry={ry * 0.92} fill={`url(#${pid})`} />
+        <path d={`M ${lx} ${endY} A ${ex} ${ry} 0 0 0 ${rx} ${endY}`} fill="none" stroke={accent} strokeWidth="1" strokeOpacity="0.5" />
+        <path d={`M ${lx} ${endY} A ${ex} ${ry} 0 0 1 ${rx} ${endY}`} fill="none" stroke={accent} strokeWidth="0.85" strokeOpacity="0.2" strokeDasharray="2 2.5" />
+        {/* 纯光束：不画灯具，只留极淡天花线 + 发光点（光从这里垂下来） */}
+        <line x1={cx - 26} y1={apexY} x2={cx + 26} y2={apexY} stroke={ink} strokeWidth="1" strokeOpacity="0.1" />
+        <circle cx={cx} cy={apexY} r="7" fill={`url(#${hid})`} />
+        <circle cx={cx} cy={apexY} r="2" fill={accent} />
+        <circle cx={cx - 0.6} cy={apexY - 0.6} r="0.85" fill="#fff" fillOpacity="0.9" />
       </svg>
       {!hero && (
         <span className="font-mono text-[14px] font-semibold tabular-nums text-[var(--color-ink)]">
@@ -1527,20 +1554,21 @@ function BeamCone({ angle, hero = false }: { angle: number; hero?: boolean }) {
 
 // 俯视光斑（双轴非对称 / 路面配光，柔和灰）：径向渐变光池 + 长短轴工程标注（端点刻度），各标真实角度。
 function BeamFootprint({ major, minor }: { major: number; minor: number }) {
-  const VB = 280;
-  const VH = 152;
-  const cx = 140;
-  const cy = 60;
-  const maxRx = 84;
-  const maxRy = 34;
-  const tMaj = Math.tan((Math.min(major, 170) / 2) * (Math.PI / 180));
-  const tMin = Math.tan((Math.min(minor, 170) / 2) * (Math.PI / 180));
-  const scale = Math.min(maxRx / tMaj, maxRy / tMin);
-  const rx = tMaj * scale;
-  const ry = tMin * scale;
+  const VB = 300;
+  const VH = 168;
+  const cx = 150;
+  const cy = 66;
+  const maxRx = 96;
+  const maxRy = 42;
+  // 线性映射（半径∝角度）：比例直观、椭圆不会被压成细条；真实度数由标注给出
+  const k = Math.min(maxRx / Math.max(major, 1), maxRy / Math.max(minor, 1));
+  const rx = major * k;
+  const ry = minor * k;
   const ink = "var(--color-ink)";
-  const dimY = cy + maxRy + 24;
-  const dimX = cx + maxRx + 26;
+  const accent = "var(--color-accent)";
+  const dim = "var(--color-ink-muted)";
+  const dimY = cy + maxRy + 26;
+  const dimX = cx + rx + 28;
   return (
     <div className="flex justify-center rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] px-3 py-5">
       <svg
@@ -1551,18 +1579,32 @@ function BeamFootprint({ major, minor }: { major: number; minor: number }) {
       >
         <defs>
           <radialGradient id="bfg" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor={ink} stopOpacity="0.2" />
-            <stop offset="70%" stopColor={ink} stopOpacity="0.05" />
-            <stop offset="100%" stopColor={ink} stopOpacity="0" />
+            <stop offset="0%" stopColor={accent} stopOpacity="0.34" />
+            <stop offset="55%" stopColor={accent} stopOpacity="0.10" />
+            <stop offset="100%" stopColor={accent} stopOpacity="0" />
           </radialGradient>
+          <radialGradient id="bfc" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={accent} stopOpacity="0.7" />
+            <stop offset="100%" stopColor={accent} stopOpacity="0" />
+          </radialGradient>
+          <filter id="bff" x="-30%" y="-60%" width="160%" height="220%">
+            <feGaussianBlur stdDeviation="4" />
+          </filter>
         </defs>
-        {/* 光池 */}
+        {/* 柔光晕（模糊外发光） */}
+        <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={accent} fillOpacity="0.12" filter="url(#bff)" />
+        {/* 光池：径向暖光渐变 */}
         <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="url(#bfg)" />
-        <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="none" stroke={ink} strokeWidth="0.9" strokeOpacity="0.5" />
-        <ellipse cx={cx} cy={cy} rx={rx * 0.58} ry={ry * 0.58} fill="none" stroke={ink} strokeWidth="0.75" strokeOpacity="0.22" strokeDasharray="2 2.5" />
-        <circle cx={cx} cy={cy} r="2.4" fill={ink} />
-        {/* 长轴标注（横向 = major） */}
-        <g stroke={ink} strokeWidth="0.9" strokeOpacity="0.55">
+        {/* 等照度环（isolux）：由外到内逐渐变亮 */}
+        <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="none" stroke={accent} strokeWidth="1" strokeOpacity="0.32" />
+        <ellipse cx={cx} cy={cy} rx={rx * 0.7} ry={ry * 0.7} fill="none" stroke={accent} strokeWidth="0.9" strokeOpacity="0.46" />
+        <ellipse cx={cx} cy={cy} rx={rx * 0.42} ry={ry * 0.42} fill="none" stroke={accent} strokeWidth="0.85" strokeOpacity="0.6" strokeDasharray="2.5 2.5" />
+        {/* 发光中心 */}
+        <circle cx={cx} cy={cy} r="7" fill="url(#bfc)" />
+        <circle cx={cx} cy={cy} r="2.2" fill={accent} />
+        <circle cx={cx - 0.7} cy={cy - 0.7} r="0.9" fill="#fff" fillOpacity="0.9" />
+        {/* 长轴标注（横向 = major，中性灰） */}
+        <g stroke={dim} strokeWidth="0.9" strokeOpacity="0.65">
           <line x1={cx - rx} y1={dimY} x2={cx + rx} y2={dimY} />
           <line x1={cx - rx} y1={dimY - 4} x2={cx - rx} y2={dimY + 4} />
           <line x1={cx + rx} y1={dimY - 4} x2={cx + rx} y2={dimY + 4} />
@@ -1570,8 +1612,8 @@ function BeamFootprint({ major, minor }: { major: number; minor: number }) {
         <text x={cx} y={dimY + 17} textAnchor="middle" fontFamily="monospace" fontSize="13" fontWeight="600" fill={ink}>
           {major}°
         </text>
-        {/* 短轴标注（纵向 = minor） */}
-        <g stroke={ink} strokeWidth="0.9" strokeOpacity="0.55">
+        {/* 短轴标注（纵向 = minor，中性灰） */}
+        <g stroke={dim} strokeWidth="0.9" strokeOpacity="0.65">
           <line x1={dimX} y1={cy - ry} x2={dimX} y2={cy + ry} />
           <line x1={dimX - 4} y1={cy - ry} x2={dimX + 4} y2={cy - ry} />
           <line x1={dimX - 4} y1={cy + ry} x2={dimX + 4} y2={cy + ry} />

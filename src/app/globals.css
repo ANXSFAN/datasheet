@@ -19,8 +19,8 @@
   /* Accent — a restrained warm orange-red, fitting for a lighting brand
      (the mood is light/warmth, not cold tech-blue). Per-tenant white-label
      colour (factory.accentColor) overrides --color-accent at runtime when set. */
-  --color-accent: #d9482a;
-  --color-accent-soft: #b1361d;
+  --color-accent: #d98368;
+  --color-accent-soft: #be6649;
 
   /* Radius scale — Apple */
   --radius: 10px;
