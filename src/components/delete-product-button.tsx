@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { deleteProduct } from "@/app/admin/products/actions";
 
 export function DeleteProductButton({
@@ -14,22 +15,19 @@ export function DeleteProductButton({
   productName: string;
 }) {
   const router = useRouter();
+  const t = useTranslations();
   const [pending, start] = useTransition();
 
   function onDelete() {
-    if (
-      !window.confirm(
-        `确定删除「${productName}」？\n图片 / 文档 / 视频 / 配件关系 / 扫码记录都会一并删除，且不可恢复。`,
-      )
-    )
+    if (!window.confirm(`${t("prod.deleteBtn")}: ${productName}?\n${t("prod.deleteSub")}`))
       return;
     start(async () => {
       try {
         await deleteProduct(productId);
-        toast.success("产品已删除");
+        toast.success(t("prod.deleteBtn"));
         router.push("/admin/products");
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "删除失败");
+        toast.error(e instanceof Error ? e.message : t("admin.common.delete"));
       }
     });
   }
@@ -38,9 +36,9 @@ export function DeleteProductButton({
     <section className="mt-6 rounded-2xl border border-red-200 bg-red-50/40 p-6">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[13px] font-medium text-red-700">删除产品</p>
+          <p className="text-[13px] font-medium text-red-700">{t("prod.deleteTitle")}</p>
           <p className="mt-0.5 text-[11px] text-red-600/80">
-            连带清除该产品的图片 / 文档 / 视频 / 关系 / 统计数据，不可恢复。
+            {t("prod.deleteSub")}
           </p>
         </div>
         <button
@@ -54,7 +52,7 @@ export function DeleteProductButton({
           ) : (
             <Trash2 className="h-4 w-4" />
           )}
-          删除此产品
+          {t("prod.deleteBtn")}
         </button>
       </div>
     </section>

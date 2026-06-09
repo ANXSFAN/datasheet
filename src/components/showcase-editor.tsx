@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRef, useState, useTransition } from "react";
 import {
   Plus,
@@ -226,6 +227,7 @@ export function ShowcaseEditor({
   const baseLocale = initialSourceLocale || "es";
   const [editingLocale, setEditingLocale] = useState(baseLocale);
   const isSource = editingLocale === baseLocale;
+  const tr = useTranslations("prod");
   const [pending, start] = useTransition();
   const [genPending, startGen] = useTransition();
   const [transPending, startTrans] = useTransition();
@@ -510,7 +512,7 @@ export function ShowcaseEditor({
     <section className="mt-6 rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] p-6">
       <div className="flex items-baseline justify-between border-b border-[var(--color-rule)] pb-3">
         <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-          Showcase · 展示内容
+{tr("showcaseTitle")}
         </p>
         <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
           卖点 · 亮点 · 应用场景 · 图文 · FAQ

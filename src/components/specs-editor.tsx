@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Plus, Trash2, ArrowUp, ArrowDown, X } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { saveProductSpecs } from "@/app/admin/products/actions";
 
 type SpecRow = { group: string; label: string; value: string; unit: string };
@@ -22,6 +23,7 @@ export function SpecsEditor({
   initialSpecs: SpecRow[];
   initialCerts: string[];
 }) {
+  const t = useTranslations();
   const [rows, setRows] = useState<SpecRow[]>(initialSpecs);
   const [certs, setCerts] = useState<string[]>(initialCerts);
   const [certDraft, setCertDraft] = useState("");
@@ -86,38 +88,38 @@ export function SpecsEditor({
     <section className="mt-6 rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] p-6">
       <div className="flex items-baseline justify-between border-b border-[var(--color-rule)] pb-3">
         <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-          Specs · 规格 / 认证
+          {t("prod.specsTitle")}
         </p>
         <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-          参数表 + 认证徽章
+          {t("prod.specsSub")}
         </span>
       </div>
 
       {/* 规格参数 */}
       <div className="mt-5">
         <div className="flex items-center justify-between">
-          <label className={labelCls}>规格参数（分组可留空 · 顺序即展示顺序）</label>
+          <label className={labelCls}>{t("prod.params")}</label>
           <button
             type="button"
             onClick={addRow}
             className="flex items-center gap-1 font-mono text-[11px] text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
           >
-            <Plus className="h-3.5 w-3.5" /> 添加参数
+            <Plus className="h-3.5 w-3.5" /> {t("prod.addParam")}
           </button>
         </div>
 
         {rows.length === 0 ? (
           <p className="mt-3 text-[12px] text-[var(--color-ink-faint)]">
-            暂无参数。如：分组「光参数」、参数名「光通量」、值「1200」、单位「lm」。
+            {t("prod.params")}
           </p>
         ) : (
           <div className="mt-3 space-y-2">
             {/* 列头 */}
             <div className="hidden gap-2 px-1 sm:flex">
-              <span className={`${labelCls} w-28 shrink-0`}>分组</span>
-              <span className={`${labelCls} w-40 shrink-0`}>参数名</span>
-              <span className={`${labelCls} flex-1`}>参数值</span>
-              <span className={`${labelCls} w-20 shrink-0`}>单位</span>
+              <span className={`${labelCls} w-28 shrink-0`}>{t("prod.group")}</span>
+              <span className={`${labelCls} w-40 shrink-0`}>{t("prod.paramName")}</span>
+              <span className={`${labelCls} flex-1`}>{t("prod.paramValue")}</span>
+              <span className={`${labelCls} w-20 shrink-0`}>{t("prod.unit")}</span>
               <span className="w-16 shrink-0" />
             </div>
             {rows.map((r, i) => (
@@ -125,25 +127,25 @@ export function SpecsEditor({
                 <input
                   value={r.group}
                   onChange={(e) => updateRow(i, { group: e.target.value })}
-                  placeholder="分组(可选)"
+                  placeholder={t("prod.group")}
                   className={`${inputBase} w-28 shrink-0`}
                 />
                 <input
                   value={r.label}
                   onChange={(e) => updateRow(i, { label: e.target.value })}
-                  placeholder="参数名"
+                  placeholder={t("prod.paramName")}
                   className={`${inputBase} w-40 shrink-0`}
                 />
                 <input
                   value={r.value}
                   onChange={(e) => updateRow(i, { value: e.target.value })}
-                  placeholder="参数值"
+                  placeholder={t("prod.paramValue")}
                   className={inputCls}
                 />
                 <input
                   value={r.unit}
                   onChange={(e) => updateRow(i, { unit: e.target.value })}
-                  placeholder="单位"
+                  placeholder={t("prod.unit")}
                   className={`${inputBase} w-20 shrink-0`}
                 />
                 <div className="flex shrink-0 items-center">
@@ -182,7 +184,7 @@ export function SpecsEditor({
 
       {/* 认证 */}
       <div className="mt-6">
-        <label className={labelCls}>认证徽章</label>
+        <label className={labelCls}>{t("prod.certs")}</label>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {certs.map((c, i) => (
             <span
@@ -210,7 +212,7 @@ export function SpecsEditor({
               }
             }}
             onBlur={() => addCert(certDraft)}
-            placeholder="输入后回车，如 CE / RoHS / IP65"
+            placeholder={t("prod.certPh")}
             className={`${inputBase} w-56`}
           />
         </div>
@@ -226,7 +228,7 @@ export function SpecsEditor({
           disabled={pending}
           className="rounded-lg bg-[var(--color-ink)] px-5 py-2 text-sm font-medium text-[var(--color-surface)] transition hover:opacity-90 disabled:opacity-50"
         >
-          {pending ? "保存中…" : "保存规格 / 认证"}
+          {pending ? t("admin.common.saving") : t("prod.saveSpecs")}
         </button>
       </div>
     </section>

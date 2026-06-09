@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   addProductImage,
   removeProductImage,
@@ -45,6 +46,7 @@ export function GalleryManager({
   images: GalleryImage[];
 }) {
   const router = useRouter();
+  const t = useTranslations();
   const [pending, start] = useTransition();
   const coverRef = useRef<HTMLInputElement>(null);
   const addRef = useRef<HTMLInputElement>(null);
@@ -121,17 +123,17 @@ export function GalleryManager({
     <section className="mt-6 rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] p-6">
       <div className="flex items-baseline justify-between border-b border-[var(--color-rule)] pb-3">
         <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-          Gallery · 产品图
+          {t("prod.galleryTitle")}
         </p>
         <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-          封面 + 画廊（公开页大图轮播）
+          {t("prod.gallerySub")}
         </span>
       </div>
 
       {/* 封面图 */}
       <div className="mt-5">
         <label className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-          封面图（排在轮播最前）
+          {t("prod.cover")}
         </label>
         <div className="mt-2 flex items-center gap-4">
           <div className="relative h-24 w-32 shrink-0 overflow-hidden rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface-sunken)]">
@@ -156,17 +158,17 @@ export function GalleryManager({
               ) : (
                 <Upload className="h-3.5 w-3.5" />
               )}
-              {coverImage ? "替换封面" : "上传封面"}
+              {coverImage ? t("prod.replaceCover") : t("prod.uploadCover")}
             </button>
             {coverImage && (
               <button
                 type="button"
-                onClick={() => run(() => setProductCover(productId, ""), "已清除封面")}
+                onClick={() => run(() => setProductCover(productId, ""), t("prod.clearCover"))}
                 disabled={pending}
                 className="flex items-center gap-1.5 rounded-full border border-[var(--color-rule)] px-4 py-2 text-xs text-[var(--color-ink-muted)] transition hover:text-red-600 disabled:opacity-50"
               >
                 <X className="h-3.5 w-3.5" />
-                清除
+                {t("prod.clearCover")}
               </button>
             )}
           </div>
@@ -184,7 +186,7 @@ export function GalleryManager({
       <div className="mt-6">
         <div className="flex items-center justify-between">
           <label className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-            画廊图（可多选上传 · 拖动顺序用按钮调）
+            {t("prod.galleryImgs")}
           </label>
           <button
             type="button"
@@ -197,7 +199,7 @@ export function GalleryManager({
             ) : (
               <Upload className="h-3.5 w-3.5" />
             )}
-            上传图片
+            {t("prod.uploadImgs")}
           </button>
           <input
             ref={addRef}
@@ -211,7 +213,7 @@ export function GalleryManager({
 
         {order.length === 0 ? (
           <p className="mt-3 text-[12px] text-[var(--color-ink-faint)]">
-            暂无画廊图。建议上传 3–6 张：主图、细节特写、安装效果、实景图。
+            {t("prod.galleryEmpty")}
           </p>
         ) : (
           <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -229,7 +231,7 @@ export function GalleryManager({
                   />
                   {coverImage === img.url && (
                     <span className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-full bg-[var(--color-ink)] px-2 py-0.5 text-[10px] font-medium text-white">
-                      <Star className="h-3 w-3" /> 封面
+                      <Star className="h-3 w-3" /> {t("prod.coverBadge")}
                     </span>
                   )}
                 </div>
@@ -260,12 +262,12 @@ export function GalleryManager({
                       onClick={() =>
                         run(
                           () => setProductCover(productId, img.url),
-                          "已设为封面",
+                          t("prod.setCover"),
                         )
                       }
                       disabled={pending || coverImage === img.url}
-                      aria-label="设为封面"
-                      title="设为封面"
+                      aria-label={t("prod.setCover")}
+                      title={t("prod.setCover")}
                       className="p-1 text-[var(--color-ink-faint)] transition hover:text-[var(--color-ink)] disabled:opacity-30"
                     >
                       <Star className="h-3.5 w-3.5" />
