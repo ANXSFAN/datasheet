@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { autofillMissingShowcase } from "@/app/admin/products/actions";
 
 /**
@@ -16,6 +17,7 @@ export function AutofillShowcasePanel({
   missingCount: number;
 }) {
   const router = useRouter();
+  const t = useTranslations("more");
   const [remaining, setRemaining] = useState(missingCount);
   const [pending, start] = useTransition();
 
@@ -25,12 +27,11 @@ export function AutofillShowcasePanel({
         const r = await autofillMissingShowcase();
         setRemaining(r.remaining);
         toast.success(
-          `已生成 ${r.done} 个并翻译（共 ${r.translated} 条译文）` +
-            (r.remaining > 0 ? `，剩余 ${r.remaining} 个待处理` : "，全部完成")
+          t("autofillDone", { done: r.done, translated: r.translated, remaining: r.remaining })
         );
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "批量生成失败");
+        toast.error(e instanceof Error ? e.message : t("autofillFail"));
       }
     });
   }
@@ -40,17 +41,14 @@ export function AutofillShowcasePanel({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-            导入后 · AI 批量补全
+            {t("autofillTitle")}
           </p>
           <p className="mt-2 text-sm text-[var(--color-ink-muted)]">
-            对<span className="font-medium text-[var(--color-ink)]"> 缺展示内容 </span>
-            的产品一键 AI 生成卖点 / 场景 / FAQ / 盒内 / 安装 / 图文，并翻译成全部语言。
-            当前待处理：
-            <span className="font-medium text-[var(--color-ink)]">{remaining}</span> 个
-            （每次处理 5 个，可重复点）。
+            {t("autofillDesc")}：
+            <span className="font-medium text-[var(--color-ink)]">{remaining}</span> {t("pcs")}
           </p>
           <p className="mt-1 text-[11px] text-[var(--color-ink-faint)]">
-            需配置 OPENROUTER_API_KEY。生成内容为草稿，建议到产品页过目后再发布。
+            {t("autofillNote")}
           </p>
         </div>
         <button
@@ -65,10 +63,10 @@ export function AutofillShowcasePanel({
             <Sparkles className="h-3.5 w-3.5" />
           )}
           {pending
-            ? "生成中…"
+            ? t("autofilling")
             : remaining === 0
-              ? "无待处理产品"
-              : `AI 生成并翻译（${Math.min(5, remaining)}）`}
+              ? t("autofillNone")
+              : `${t("autofillBtn")}（${Math.min(5, remaining)}）`}
         </button>
       </div>
     </section>

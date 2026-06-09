@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { QrCode, Download, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { normalizeSource } from "@/lib/channel";
 
 /**
@@ -10,6 +11,7 @@ import { normalizeSource } from "@/lib/channel";
  * 扫码后产品页按来源归因统计。留空则导出不带渠道码的通用 QR。
  */
 export function QrExportButton() {
+  const t = useTranslations("more");
   const [open, setOpen] = useState(false);
   const [raw, setRaw] = useState("");
 
@@ -28,7 +30,7 @@ export function QrExportButton() {
         className="flex items-center gap-1.5 rounded-full border border-[var(--color-rule)] px-4 py-2 text-xs text-[var(--color-ink)] transition hover:bg-[var(--color-surface-sunken)]"
       >
         <QrCode className="h-3.5 w-3.5" />
-        导出二维码
+        {t("qrExport")}
       </button>
     );
   }
@@ -40,23 +42,23 @@ export function QrExportButton() {
         value={raw}
         onChange={(e) => setRaw(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleExport()}
-        placeholder="渠道标签（选填，如 expo2026）"
+        placeholder={t("channelPh")}
         className="w-44 bg-transparent text-xs text-[var(--color-ink)] outline-none placeholder:text-[var(--color-ink-faint)]"
       />
       <span className="hidden font-mono text-[10px] text-[var(--color-ink-muted)] sm:inline">
-        {normalized ? `?s=${normalized}` : "通用"}
+        {normalized ? `?s=${normalized}` : t("generic")}
       </span>
       <button
         onClick={handleExport}
         className="flex items-center gap-1 rounded-full bg-[var(--color-ink)] px-3 py-1.5 text-xs text-white transition hover:bg-[#424245]"
       >
         <Download className="h-3.5 w-3.5" />
-        下载 PDF
+        {t("downloadPdf")}
       </button>
       <button
         onClick={() => setOpen(false)}
         className="rounded-full p-1.5 text-[var(--color-ink-muted)] transition hover:bg-[var(--color-surface-sunken)]"
-        aria-label="取消"
+        aria-label={t("cancel")}
       >
         <X className="h-3.5 w-3.5" />
       </button>

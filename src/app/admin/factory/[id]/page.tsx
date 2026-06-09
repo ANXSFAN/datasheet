@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { ArrowLeft } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
+import { getAdminLocale } from "@/lib/admin-locale";
 import { AccentSwatchPicker } from "@/components/accent-swatch-picker";
 import { ACCENT_SWATCHES } from "@/components/accent-swatches";
 
@@ -62,6 +64,10 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
   });
   if (!factory) notFound();
 
+  const locale = await getAdminLocale();
+  const t = await getTranslations({ locale, namespace: "more" });
+  const tc = await getTranslations({ locale, namespace: "admin.common" });
+
   return (
     <div className="space-y-8">
       <div>
@@ -70,23 +76,23 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
           className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
         >
           <ArrowLeft className="h-3 w-3" />
-          All factories
+          {t("facBack")}
         </Link>
         <h1 className="headline-lg mt-3 text-[26px] text-[var(--color-ink)]">
           {factory.name}
         </h1>
         <p className="mt-1 font-mono text-xs text-[var(--color-ink-muted)]">
-          {factory.slug} · {factory._count.products} products
+          {factory.slug} · {factory._count.products} {t("subProducts")}
         </p>
       </div>
 
       <form action={saveFactory} className="space-y-7">
         <input type="hidden" name="id" value={factory.id} />
 
-        <Section title="Brand · 品牌">
+        <Section title={t("facBrand")}>
           <Field
-            label="Name · 全称"
-            help="工厂正式名称，公开页脚 © 行使用"
+            label={t("facName")}
+            help={t("facNameHelp")}
           >
             <input
               name="name"
@@ -96,8 +102,8 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
             />
           </Field>
           <Field
-            label="Brand Short · 顶栏简称"
-            help="如 SYSLED / LUMOS·LED，建议 ≤ 12 个字符"
+            label={t("facShort")}
+            help={t("facShortHelp")}
           >
             <input
               name="brandShort"
@@ -107,7 +113,7 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
           </Field>
           <Field
             label="Logo URL"
-            help="粘贴 logo 图片直链；上传通道待 R2 配置后启用"
+            help={t("facLogoHelp")}
           >
             <input
               name="logoUrl"
@@ -119,10 +125,10 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
           </Field>
         </Section>
 
-        <Section title="Theme · 主色">
+        <Section title={t("facTheme")}>
           <Field
-            label="Accent · 品牌色"
-            help="租户品牌色，运行时注入产品页 --color-accent（用于工厂标识等品牌元素）。"
+            label={t("facAccent")}
+            help={t("facAccentHelp")}
           >
             <AccentSwatchPicker
               name="accentColor"
@@ -131,10 +137,10 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
           </Field>
         </Section>
 
-        <Section title="Contact · 联系方式">
+        <Section title={t("facContact")}>
           <Field
             label="Email"
-            help="询盘按钮的 mailto 目标"
+            help={t("facEmailHelp")}
           >
             <input
               name="contactEmail"
@@ -145,7 +151,7 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
           </Field>
           <Field
             label="WhatsApp"
-            help="E.164 格式，如 +8613800001234"
+            help={t("facWhatsappHelp")}
           >
             <input
               name="contactWhatsapp"
@@ -155,8 +161,8 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
             />
           </Field>
           <Field
-            label="Inquiry Note · 询盘区文案"
-            help="显示在询盘按钮上方一行，可写「24h 回复 / 支持 OEM」等"
+            label={t("facNote")}
+            help={t("facNoteHelp")}
           >
             <textarea
               name="inquiryNote"
@@ -169,13 +175,13 @@ export default async function AdminFactoryEditPage({ params }: PageProps) {
 
         <div className="flex items-center gap-3 border-t border-[var(--color-rule)] pt-5">
           <button type="submit" className="appbtn">
-            Save changes
+            {tc("save")}
           </button>
           <Link
             href="/admin/factory"
             className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
           >
-            Cancel
+            {tc("cancel")}
           </Link>
         </div>
       </form>

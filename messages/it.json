@@ -39,6 +39,29 @@
     "relTitle": "Categoria e attributi", "category": "Categoria", "series": "Serie · chiave di raggruppamento", "seriesPh": "es. Serie Starlight", "pcb": "Larghezza PCB · abbina il profilo", "pcbPh": "es. 10mm", "voltage": "Tensione · abbina l'alim.", "voltagePh": "es. 24V", "watt": "Potenza W · suggerimento", "wattPh": "es. 14.4", "saveAttr": "Salva categoria e attributi", "suggestions": "Suggerimenti automatici", "suggestEmpty": "Nessun suggerimento. Il prodotto deve essere una striscia con larghezza PCB / tensione, e deve esistere un profilo / alim. compatibile in questa fabbrica.", "adopt": "Adotta", "linksTitle": "Accessori · autorevole", "addModelPh": "Modello compatibile", "relAccessory": "Accessorio", "relAlternative": "Alternativa", "uncat": "— Senza categoria —",
     "videos": "Video", "documents": "Documenti", "videoTitle": "Titolo del video", "videoUrl": "Link del video, o carica a destra", "addVideo": "Aggiungi video", "upload": "Carica", "docTitle": "Titolo del documento (vuoto = nome file)", "pickUpload": "Scegli file e carica"
   },
+  "more": {
+    "syncBtn": "Sincronizza prodotti dal sito principale", "syncing": "Sincronizzazione…", "syncFail": "Sincronizzazione fallita", "syncOk": "Sincronizzati: {created} nuovi, {updated} aggiornati",
+    "qrTitle": "Scansiona / QR", "copyLink": "Copia link", "downloadQr": "Scarica QR", "copied": "Link copiato",
+    "qrExport": "Esporta QR", "channelPh": "Etichetta canale (facoltativo, es. expo2026)", "generic": "Generico", "downloadPdf": "Scarica PDF", "cancel": "Annulla",
+    "autofillTitle": "Dopo l'import · riempimento IA massivo", "autofillDesc": "Per i prodotti senza vetrina, l'IA genera argomenti / scene / FAQ / contenuto / installazione / dettaglio e traduce in tutte le lingue. In sospeso", "autofillNote": "Richiede OPENROUTER_API_KEY. Il contenuto generato è una bozza; rivedi nella pagina prodotto prima di pubblicare.", "autofillBtn": "Genera e traduci con IA", "autofilling": "Generazione…", "autofillNone": "Nessun prodotto in sospeso",
+    "autofillDone": "Generati {done}, {translated} traduzioni, {remaining} rimanenti",
+    "autofillFail": "Generazione in blocco non riuscita", "pcs": "",
+    "impStep1": "Passo 1 · Modello e caricamento", "impStep1Hint": "Scarica il modello, compila i quattro fogli (prodotti / specifiche / immagini / accessori) per modello, poi carica per l'anteprima. L'import scrive nella fabbrica", "downloadTpl": "Scarica modello", "parsing": "Analisi…", "pickFile": "Scegli .xlsx / .csv", "impStep2": "Passo 2 · Anteprima (non ancora salvato)", "reselect": "Riseleziona file", "create": "Nuovi", "update": "Aggiornati", "errorRows": "Righe con errore", "linkRows": "Accessori", "specN": "{n} righe specifiche", "imageN": "{n} righe immagini", "totalProd": "{n} prodotti", "action": "Azione", "model": "Modello", "name": "Nome", "specImg": "Spec/img", "errorsSkip": "{n} righe con problemi saranno saltate", "errorReport": "Report errori CSV", "moreRows": "… altre {n} righe, scarica il report completo", "importing": "Importazione…", "confirmImport": "Conferma import: {n} prodotti", "noValid": "Nessuna riga prodotto valida da importare", "previewFail": "Anteprima fallita", "importFail": "Import fallito",
+    "impDone": "Importazione completata: {created} creati, {updated} aggiornati, {linkRows} collegamenti accessori",
+    "impDoneSkip": ", {n} righe con errori saltate",
+    "impCsvHeader": "Foglio,Riga,Modello,Errore",
+    "impNotSel": "(nessuna selezionata)",
+    "impRowLabel": "[{sheet} riga {row}]",
+    "facBrand": "Marchio", "facName": "Nome", "facNameHelp": "Nome ufficiale della fabbrica, usato nella riga © del footer pubblico", "facShort": "Nome breve barra", "facShortHelp": "es. SYSLED / LUMOS·LED, ≤ 12 caratteri", "facLogoHelp": "Incolla un link diretto all'immagine del logo; caricamento in attesa della config R2", "facTheme": "Accento", "facAccent": "Colore del marchio", "facAccentHelp": "Colore del marchio del tenant, iniettato come accento della pagina prodotto.", "facContact": "Contatto", "facEmailHelp": "Destinazione mailto del pulsante richiesta", "facWhatsappHelp": "Formato E.164, es. +8613800001234", "facNote": "Nota richiesta", "facNoteHelp": "Mostrata su una riga sopra il pulsante richiesta.",
+    "facBack": "Tutte le fabbriche",
+    "anaTitle": "Statistiche", "anaCoverage": "Copertura contenuti", "anaTarget": "Obiettivo · {n} lingue", "anaProducts": "Prodotti totali", "anaReady": "Tutte le lingue pronte", "anaNoShowcase": "Senza vetrina", "anaTodo": "Da fare", "anaAllGood": "✓ Tutti i prodotti hanno contenuto vetrina con traduzioni complete e aggiornate.", "anaTodoList": "Da fare ({n})", "anaMore": "… altri {n}", "anaTransN": "Traduzioni {a}/{b}", "anaStale": "Traduzione obsoleta", "anaNoScans": "Nessuna scansione negli ultimi 30 giorni. Esporta QR con codice canale su prodotti / imballi per iniziare a misurare.", "anaOverview": "Panoramica 30 giorni", "anaPeak": "Giorno di picco", "anaTotalScans": "Scansioni totali", "anaPdf": "Download PDF", "anaConv": "Conv. download", "anaActiveProd": "Prodotti scansionati", "anaTopProd": "Prodotti top", "anaBySource": "Per origine", "anaDirect": "Diretto / senza codice canale", "anaByLang": "Per lingua", "anaByRegion": "Per regione (Top 8)", "anaUnknown": "Sconosciuto",
+    "anaRange": "Ultimi 30 giorni · {a} → {b}",
+    "anaNoFactory": "Nessuna fabbrica trovata. Esegui prima db:seed.",
+    "anaNoScansTitle": "Ancora nessuna scansione",
+    "anaDaysAgo": "30 giorni fa",
+    "anaTodayLabel": "Oggi", "subProducts": "prodotti", "subCats": "categorie", "subSeries": "serie",
+    "emptyProducts": "Ancora nessun prodotto per questa fabbrica. Fai clic su «Sincronizza dal sito principale» in alto a destra o carica tramite «Importa»."
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

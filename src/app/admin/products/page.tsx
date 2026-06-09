@@ -17,7 +17,10 @@ export default async function AdminCatalogPage({
 }) {
   const { need } = await searchParams;
   const factory = await getActiveFactory();
-  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin.page" });
+  const locale = await getAdminLocale();
+  const t = await getTranslations({ locale, namespace: "admin.page" });
+  const tc = await getTranslations({ locale, namespace: "admin.common" });
+  const tm = await getTranslations({ locale, namespace: "more" });
 
   // Intentional: force-dynamic page, current time each render.
   // eslint-disable-next-line react-hooks/purity
@@ -120,10 +123,11 @@ export default async function AdminCatalogPage({
                   {factory.name}
                 </span>
                 {" · "}
-                {products.length} 产品 · {categories.length} 分类 · {series.length} 系列
+                {products.length} {tm("subProducts")} · {categories.length} {tm("subCats")} ·{" "}
+                {series.length} {tm("subSeries")}
               </>
             ) : (
-              "未选择工厂，请先在顶栏切换「当前工厂」"
+              tc("noFactory")
             )}
           </p>
         </div>
@@ -136,7 +140,7 @@ export default async function AdminCatalogPage({
       {!factory ? null : products.length === 0 && categories.length === 0 ? (
         <div className="mt-12 rounded-2xl border border-dashed border-[var(--color-rule)] py-16 text-center">
           <p className="text-sm text-[var(--color-ink-muted)]">
-            当前工厂还没有产品，点击右上角「从主站同步产品」或到「导入」上传
+            {tm("emptyProducts")}
           </p>
         </div>
       ) : (

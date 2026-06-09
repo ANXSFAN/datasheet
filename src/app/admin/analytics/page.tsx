@@ -24,7 +24,9 @@ function dateKey(d: Date) {
 
 export default async function AdminAnalyticsPage() {
   const factory = await getActiveFactory();
-  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin.page" });
+  const locale = await getAdminLocale();
+  const t = await getTranslations({ locale, namespace: "admin.page" });
+  const a = await getTranslations({ locale, namespace: "more" });
 
   // Intentional: page is `force-dynamic`, every render must use current time.
   // eslint-disable-next-line react-hooks/purity
@@ -163,7 +165,7 @@ export default async function AdminAnalyticsPage() {
 
   const localeLabel = (k: string) =>
     k === "__unknown"
-      ? "未知"
+      ? a("anaUnknown")
       : (LOCALE_LABELS[k as AppLocale] ?? k);
 
   const activeProducts = perProduct.size;
@@ -180,10 +182,11 @@ export default async function AdminAnalyticsPage() {
               <span className="font-medium text-[var(--color-ink)]">
                 {factory.name}
               </span>
-              {" · "}近 30 天 · {dateKey(since)} → {dateKey(today)}
+              {" · "}
+              {a("anaRange", { a: dateKey(since), b: dateKey(today) })}
             </>
           ) : (
-            "未找到工厂记录，请先运行 db:seed"
+            a("anaNoFactory")
           )}
         </p>
       </div>
@@ -193,28 +196,28 @@ export default async function AdminAnalyticsPage() {
         <section className="mt-8 rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] p-6">
           <div className="flex items-baseline justify-between border-b border-[var(--color-rule)] pb-3">
             <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-              Content coverage · 内容覆盖度
+              {a("anaCoverage")}
             </p>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-              译文目标 · {TARGET_LANGS} 语
+              {a("anaTarget", { n: TARGET_LANGS })}
             </p>
           </div>
 
           <div className="mt-5 grid grid-cols-2 gap-6 sm:grid-cols-4">
-            <Stat label="Products · 产品总数" value={products.length} />
-            <Stat label="Ready · 全语言就绪" value={covFull} />
-            <Stat label="No showcase · 缺展示" value={covNoShowcase} />
-            <Stat label="To do · 待补" value={attention.length} />
+            <Stat label={a("anaProducts")} value={products.length} />
+            <Stat label={a("anaReady")} value={covFull} />
+            <Stat label={a("anaNoShowcase")} value={covNoShowcase} />
+            <Stat label={a("anaTodo")} value={attention.length} />
           </div>
 
           {attention.length === 0 ? (
             <p className="mt-5 text-sm text-[var(--color-ink-muted)]">
-              ✓ 全部产品都有展示内容且译文齐全、无过期。
+              {a("anaAllGood")}
             </p>
           ) : (
             <div className="mt-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ink-muted)]">
-                待补清单（{attention.length}）
+                {a("anaTodoList", { n: attention.length })}
               </p>
               <div className="mt-3 space-y-1">
                 {attention.slice(0, 12).map(({ p, hasShowcase, transCount, stale }) => (
@@ -232,18 +235,18 @@ export default async function AdminAnalyticsPage() {
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-1.5">
-                      {!hasShowcase && <Tag tone="bad">缺展示</Tag>}
+                      {!hasShowcase && <Tag tone="bad">{a("anaNoShowcase")}</Tag>}
                       {hasShowcase && transCount < TARGET_LANGS && (
-                        <Tag tone="warn">译文 {transCount}/{TARGET_LANGS}</Tag>
+                        <Tag tone="warn">{a("anaTransN", { a: transCount, b: TARGET_LANGS })}</Tag>
                       )}
-                      {stale && <Tag tone="warn">译文过期</Tag>}
+                      {stale && <Tag tone="warn">{a("anaStale")}</Tag>}
                     </div>
                     <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[var(--color-ink-faint)] transition group-hover:text-[var(--color-ink-muted)]" />
                   </Link>
                 ))}
                 {attention.length > 12 && (
                   <p className="px-2 pt-1 font-mono text-[11px] text-[var(--color-ink-muted)]">
-                    … 还有 {attention.length - 12} 个
+                    {a("anaMore", { n: attention.length - 12 })}
                   </p>
                 )}
               </div>
@@ -255,10 +258,10 @@ export default async function AdminAnalyticsPage() {
       {totalScans === 0 ? (
         <div className="mt-10 rounded-2xl border border-dashed border-[var(--color-rule)] py-20 text-center">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-            No scans yet
+            {a("anaNoScansTitle")}
           </p>
           <p className="mt-3 text-sm text-[var(--color-ink-soft)]">
-            近 30 天还没有扫码记录。导出带渠道码的二维码贴到产品 / 包装上即可开始统计。
+            {a("anaNoScans")}
           </p>
         </div>
       ) : (
@@ -267,18 +270,18 @@ export default async function AdminAnalyticsPage() {
           <section className="mt-8 rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] p-6">
             <div className="flex items-baseline justify-between border-b border-[var(--color-rule)] pb-3">
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-                Overview · 30 days
+                {a("anaOverview")}
               </p>
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-                Peak day · {maxDay}
+                {a("anaPeak")} · {maxDay}
               </p>
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-6 sm:grid-cols-4">
-              <Stat label="Scans · 总扫码" value={totalScans} />
-              <Stat label="PDF · 下载" value={pdfDownloads} />
-              <Stat label="Conv · 下载转化" value={pdfConv} suffix="%" />
-              <Stat label="Products · 被扫产品" value={activeProducts} />
+              <Stat label={a("anaTotalScans")} value={totalScans} />
+              <Stat label={a("anaPdf")} value={pdfDownloads} />
+              <Stat label={a("anaConv")} value={pdfConv} suffix="%" />
+              <Stat label={a("anaActiveProd")} value={activeProducts} />
             </div>
 
             <div className="mt-6">
@@ -307,8 +310,8 @@ export default async function AdminAnalyticsPage() {
                 })}
               </div>
               <div className="mt-2 flex items-baseline justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-muted)]">
-                <span>30 days ago</span>
-                <span>Today</span>
+                <span>{a("anaDaysAgo")}</span>
+                <span>{a("anaTodayLabel")}</span>
               </div>
             </div>
           </section>
@@ -317,7 +320,7 @@ export default async function AdminAnalyticsPage() {
             {/* TOP 产品 */}
             <section className="rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] p-6">
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-                Top products · 热门产品
+                {a("anaTopProd")}
               </p>
               <div className="mt-4 space-y-1">
                 {topProducts.map(({ product, count }, idx) => {
@@ -356,12 +359,12 @@ export default async function AdminAnalyticsPage() {
             {/* 渠道分布 */}
             <section className="rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] p-6">
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-                By source · 来源渠道
+                {a("anaBySource")}
               </p>
               <div className="mt-4 space-y-3">
                 {sourceRows.map(([key, n]) => {
                   const label =
-                    key === "__direct" ? "直接访问 / 无渠道码" : key;
+                    key === "__direct" ? a("anaDirect") : key;
                   const pct = Math.round((n / totalScans) * 100);
                   return (
                     <div key={key} className="flex items-center gap-3">
@@ -386,7 +389,7 @@ export default async function AdminAnalyticsPage() {
             {/* 语言分布 */}
             <section className="rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] p-6">
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-                By language · 语言分布
+                {a("anaByLang")}
               </p>
               <div className="mt-4 space-y-3">
                 {localeRows.map(([key, n]) => {
@@ -414,7 +417,7 @@ export default async function AdminAnalyticsPage() {
             {/* 地区分布 */}
             <section className="rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] p-6">
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--color-ink)]">
-                By region · 地区分布（Top 8）
+                {a("anaByRegion")}
               </p>
               <div className="mt-4 space-y-3">
                 {countryRows.map(([key, n]) => {
@@ -422,7 +425,7 @@ export default async function AdminAnalyticsPage() {
                   return (
                     <div key={key} className="flex items-center gap-3">
                       <span className="w-36 shrink-0 truncate font-mono text-xs text-[var(--color-ink)]">
-                        {key === "__unknown" ? "未知" : key}
+                        {key === "__unknown" ? a("anaUnknown") : key}
                       </span>
                       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--color-surface-sunken)]">
                         <div

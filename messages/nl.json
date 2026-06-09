@@ -39,6 +39,29 @@
     "relTitle": "Categorie & kenmerken", "category": "Categorie", "series": "Serie · groeperingssleutel", "seriesPh": "bv. Starlight-serie", "pcb": "PCB-breedte · past bij profiel", "pcbPh": "bv. 10mm", "voltage": "Spanning · past bij voeding", "voltagePh": "bv. 24V", "watt": "Vermogen W · hint", "wattPh": "bv. 14.4", "saveAttr": "Categorie & kenmerken opslaan", "suggestions": "Automatische suggesties", "suggestEmpty": "Geen suggesties. Het product moet een strip zijn met PCB-breedte / spanning, en er moet een passend profiel / voeding in deze fabriek bestaan.", "adopt": "Overnemen", "linksTitle": "Accessoires · gezaghebbend", "addModelPh": "Compatibel model", "relAccessory": "Accessoire", "relAlternative": "Alternatief", "uncat": "— Geen categorie —",
     "videos": "Video's", "documents": "Documenten", "videoTitle": "Videotitel", "videoUrl": "Videolink, of upload rechts", "addVideo": "Video toevoegen", "upload": "Uploaden", "docTitle": "Documenttitel (leeg = bestandsnaam)", "pickUpload": "Bestand kiezen en uploaden"
   },
+  "more": {
+    "syncBtn": "Producten synchroniseren van hoofdsite", "syncing": "Synchroniseren…", "syncFail": "Synchronisatie mislukt", "syncOk": "Gesynchroniseerd: {created} nieuw, {updated} bijgewerkt",
+    "qrTitle": "Scannen / QR", "copyLink": "Link kopiëren", "downloadQr": "QR downloaden", "copied": "Link gekopieerd",
+    "qrExport": "QR exporteren", "channelPh": "Kanaaltag (optioneel, bv. expo2026)", "generic": "Algemeen", "downloadPdf": "PDF downloaden", "cancel": "Annuleren",
+    "autofillTitle": "Na import · AI-bulkvulling", "autofillDesc": "Voor producten zonder showcase genereert AI verkooppunten / scènes / FAQ / inhoud / montage / detail en vertaalt naar alle talen. In behandeling", "autofillNote": "Vereist OPENROUTER_API_KEY. Gegenereerde inhoud is een concept; controleer op de productpagina voor publicatie.", "autofillBtn": "AI genereren & vertalen", "autofilling": "Genereren…", "autofillNone": "Geen producten in behandeling",
+    "autofillDone": "{done} gegenereerd, {translated} vertalingen, {remaining} resterend",
+    "autofillFail": "Batchgeneratie mislukt", "pcs": "",
+    "impStep1": "Stap 1 · Sjabloon & upload", "impStep1Hint": "Download het sjabloon, vul de vier bladen (producten / specs / afbeeldingen / accessoires) per model in en upload om te previewen. Import schrijft naar fabriek", "downloadTpl": "Sjabloon downloaden", "parsing": "Verwerken…", "pickFile": ".xlsx / .csv kiezen", "impStep2": "Stap 2 · Voorbeeld (nog niet opgeslagen)", "reselect": "Bestand opnieuw kiezen", "create": "Nieuw", "update": "Bijgewerkt", "errorRows": "Foutregels", "linkRows": "Accessoires", "specN": "{n} specregels", "imageN": "{n} afbeeldingsregels", "totalProd": "{n} producten", "action": "Actie", "model": "Model", "name": "Naam", "specImg": "Spec/afb", "errorsSkip": "{n} regels met problemen worden overgeslagen", "errorReport": "Foutrapport CSV", "moreRows": "… {n} regels meer, download het volledige rapport", "importing": "Importeren…", "confirmImport": "Import bevestigen: {n} producten", "noValid": "Geen geldige productregels om te importeren", "previewFail": "Voorbeeld mislukt", "importFail": "Import mislukt",
+    "impDone": "Import voltooid: {created} aangemaakt, {updated} bijgewerkt, {linkRows} accessoirekoppelingen",
+    "impDoneSkip": ", {n} foutregels overgeslagen",
+    "impCsvHeader": "Blad,Rij,Model,Fout",
+    "impNotSel": "(geen geselecteerd)",
+    "impRowLabel": "[{sheet} rij {row}]",
+    "facBrand": "Merk", "facName": "Naam", "facNameHelp": "Officiële fabrieksnaam, gebruikt in de ©-regel van de publieke footer", "facShort": "Korte naam (balk)", "facShortHelp": "bv. SYSLED / LUMOS·LED, ≤ 12 tekens", "facLogoHelp": "Plak een directe logo-afbeeldingslink; upload wacht op R2-config", "facTheme": "Accent", "facAccent": "Merkkleur", "facAccentHelp": "Merkkleur van tenant, runtime geïnjecteerd als accent van de productpagina.", "facContact": "Contact", "facEmailHelp": "mailto-doel van de aanvraagknop", "facWhatsappHelp": "E.164-formaat, bv. +8613800001234", "facNote": "Aanvraagnotitie", "facNoteHelp": "Getoond op één regel boven de aanvraagknop.",
+    "facBack": "Alle fabrieken",
+    "anaTitle": "Statistieken", "anaCoverage": "Inhoudsdekking", "anaTarget": "Doel · {n} talen", "anaProducts": "Totaal producten", "anaReady": "Alle talen klaar", "anaNoShowcase": "Geen showcase", "anaTodo": "Te doen", "anaAllGood": "✓ Alle producten hebben showcase-inhoud met volledige, actuele vertalingen.", "anaTodoList": "Te doen ({n})", "anaMore": "… {n} meer", "anaTransN": "Vertalingen {a}/{b}", "anaStale": "Vertaling verouderd", "anaNoScans": "Geen scans in de laatste 30 dagen. Exporteer QR-codes met kanaalcode op producten / verpakking om te starten.", "anaOverview": "30-dagenoverzicht", "anaPeak": "Piekdag", "anaTotalScans": "Totaal scans", "anaPdf": "PDF-downloads", "anaConv": "Download-conv.", "anaActiveProd": "Gescande producten", "anaTopProd": "Topproducten", "anaBySource": "Per bron", "anaDirect": "Direct / geen kanaalcode", "anaByLang": "Per taal", "anaByRegion": "Per regio (Top 8)", "anaUnknown": "Onbekend",
+    "anaRange": "Laatste 30 dagen · {a} → {b}",
+    "anaNoFactory": "Geen fabriek gevonden. Voer eerst db:seed uit.",
+    "anaNoScansTitle": "Nog geen scans",
+    "anaDaysAgo": "30 dagen geleden",
+    "anaTodayLabel": "Vandaag", "subProducts": "producten", "subCats": "categorieën", "subSeries": "series",
+    "emptyProducts": "Nog geen producten voor deze fabriek. Klik rechtsboven op 'Synchroniseren vanaf hoofdsite' of upload via 'Importeren'."
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

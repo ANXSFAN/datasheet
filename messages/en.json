@@ -39,6 +39,29 @@
     "relTitle": "Category & attributes", "category": "Category", "series": "Series · grouping key", "seriesPh": "e.g. Starlight series", "pcb": "PCB width · matches channel", "pcbPh": "e.g. 10mm", "voltage": "Voltage · matches power", "voltagePh": "e.g. 24V", "watt": "Power W · hint", "wattPh": "e.g. 14.4", "saveAttr": "Save category & attributes", "suggestions": "Auto-match suggestions", "suggestEmpty": "No suggestions. The product must be a strip with PCB width / voltage filled, and matching channel / power must exist in this factory.", "adopt": "Adopt", "linksTitle": "Accessory links · authoritative", "addModelPh": "Compatible model", "relAccessory": "Accessory", "relAlternative": "Alternative", "uncat": "— Uncategorized —",
     "videos": "Videos", "documents": "Documents", "videoTitle": "Video title", "videoUrl": "Video link, or upload on the right", "addVideo": "Add video", "upload": "Upload", "docTitle": "Document title (blank = filename)", "pickUpload": "Choose file and upload"
   },
+  "more": {
+    "syncBtn": "Sync products from main site", "syncing": "Syncing…", "syncFail": "Sync failed", "syncOk": "Synced: {created} new, {updated} updated",
+    "qrTitle": "Scan / QR", "copyLink": "Copy link", "downloadQr": "Download QR", "copied": "Link copied",
+    "qrExport": "Export QR", "channelPh": "Channel tag (optional, e.g. expo2026)", "generic": "Generic", "downloadPdf": "Download PDF", "cancel": "Cancel",
+    "autofillTitle": "Post-import · AI bulk fill", "autofillDesc": "For products missing showcase content, AI-generate selling points / scenes / FAQ / box / install / detail and translate to all languages. Pending now", "autofillNote": "Requires OPENROUTER_API_KEY. Generated content is a draft; review on the product page before publishing.", "autofillBtn": "AI generate & translate", "autofilling": "Generating…", "autofillNone": "No pending products",
+    "autofillDone": "Generated {done}, translated {translated} strings, {remaining} remaining",
+    "autofillFail": "Batch generation failed", "pcs": "",
+    "impStep1": "Step 1 · Template & upload", "impStep1Hint": "Download the template, fill the four sheets (products / specs / images / accessories) keyed by model, then upload to preview. Import writes to factory", "downloadTpl": "Download template", "parsing": "Parsing…", "pickFile": "Choose .xlsx / .csv", "impStep2": "Step 2 · Preview (not yet saved)", "reselect": "Reselect file", "create": "New", "update": "Updated", "errorRows": "Error rows", "linkRows": "Accessory links", "specN": "{n} spec rows", "imageN": "{n} image rows", "totalProd": "{n} products", "action": "Action", "model": "Model", "name": "Name", "specImg": "Spec/img", "errorsSkip": "{n} rows have issues and will be skipped", "errorReport": "Error report CSV", "moreRows": "… {n} more rows, download the full report", "importing": "Importing…", "confirmImport": "Confirm import: {n} products", "noValid": "No valid product rows to import", "previewFail": "Preview failed", "importFail": "Import failed",
+    "impDone": "Import done: {created} created, {updated} updated, {linkRows} accessory links",
+    "impDoneSkip": ", skipped {n} error rows",
+    "impCsvHeader": "Sheet,Row,Model,Error",
+    "impNotSel": "(none selected)",
+    "impRowLabel": "[{sheet} row {row}]",
+    "facBrand": "Brand", "facName": "Name", "facNameHelp": "Official factory name, used in the public footer © line", "facShort": "Top-bar short name", "facShortHelp": "e.g. SYSLED / LUMOS·LED, ≤ 12 characters", "facLogoHelp": "Paste a direct logo image link; upload channel pending R2 config", "facTheme": "Accent", "facAccent": "Brand color", "facAccentHelp": "Tenant brand color, injected as the product page accent at runtime.", "facContact": "Contact", "facEmailHelp": "mailto target for the inquiry button", "facWhatsappHelp": "E.164 format, e.g. +8613800001234", "facNote": "Inquiry note", "facNoteHelp": "Shown on one line above the inquiry button.",
+    "facBack": "All factories",
+    "anaTitle": "Analytics", "anaCoverage": "Content coverage", "anaTarget": "Target · {n} languages", "anaProducts": "Total products", "anaReady": "All languages ready", "anaNoShowcase": "No showcase", "anaTodo": "To do", "anaAllGood": "✓ All products have showcase content with complete, up-to-date translations.", "anaTodoList": "To-do list ({n})", "anaMore": "… {n} more", "anaTransN": "Translations {a}/{b}", "anaStale": "Stale translation", "anaNoScans": "No scans in the last 30 days. Export channel-coded QR codes onto products / packaging to start tracking.", "anaOverview": "30-day overview", "anaPeak": "Peak day", "anaTotalScans": "Total scans", "anaPdf": "PDF downloads", "anaConv": "Download conv.", "anaActiveProd": "Scanned products", "anaTopProd": "Top products", "anaBySource": "By source", "anaDirect": "Direct / no channel code", "anaByLang": "By language", "anaByRegion": "By region (Top 8)", "anaUnknown": "Unknown",
+    "anaRange": "Last 30 days · {a} → {b}",
+    "anaNoFactory": "No factory record found. Run db:seed first.",
+    "anaNoScansTitle": "No scans yet",
+    "anaDaysAgo": "30 days ago",
+    "anaTodayLabel": "Today", "subProducts": "products", "subCats": "categories", "subSeries": "series",
+    "emptyProducts": "No products yet for this factory. Click “Sync from main site” at the top right, or upload via “Import”."
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",

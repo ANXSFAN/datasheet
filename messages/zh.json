@@ -39,6 +39,29 @@
     "relTitle": "分类与属性", "category": "类目", "series": "系列 · 同系列聚合键", "seriesPh": "如 星光系列", "pcb": "PCB 宽度 · 匹配铝槽", "pcbPh": "如 10mm", "voltage": "电压 · 匹配电源", "voltagePh": "如 24V", "watt": "功率 W · 提示用", "wattPh": "如 14.4", "saveAttr": "保存分类与属性", "suggestions": "自动匹配建议", "suggestEmpty": "暂无建议。需当前产品为灯带且填好 PCB 宽度 / 电压，且同工厂存在属性匹配的铝槽 / 电源。", "adopt": "采纳", "linksTitle": "配件关系 · 权威", "addModelPh": "适配型号", "relAccessory": "配件", "relAlternative": "替代", "uncat": "— 未分类 —",
     "videos": "视频", "documents": "文档", "videoTitle": "视频标题", "videoUrl": "视频链接，或点击右侧上传", "addVideo": "添加视频", "upload": "上传", "docTitle": "文档标题（留空则用文件名）", "pickUpload": "选择文件并上传"
   },
+  "more": {
+    "syncBtn": "从主站同步产品", "syncing": "同步中…", "syncFail": "同步失败", "syncOk": "同步完成：新增 {created}，更新 {updated}",
+    "qrTitle": "扫码访问 / QR", "copyLink": "复制链接", "downloadQr": "下载二维码", "copied": "已复制链接",
+    "qrExport": "导出二维码", "channelPh": "渠道标签（选填，如 expo2026）", "generic": "通用", "downloadPdf": "下载 PDF", "cancel": "取消",
+    "autofillTitle": "导入后 · AI 批量补全", "autofillDesc": "对缺展示内容的产品一键 AI 生成卖点 / 场景 / FAQ / 盒内 / 安装 / 图文，并翻译成全部语言。当前待处理", "autofillNote": "需配置 OPENROUTER_API_KEY。生成内容为草稿，建议到产品页过目后再发布。", "autofillBtn": "AI 生成并翻译", "autofilling": "生成中…", "autofillNone": "无待处理产品",
+    "autofillDone": "已生成 {done} 个，翻译 {translated} 条译文，剩余 {remaining} 个",
+    "autofillFail": "批量生成失败", "pcs": "个",
+    "impStep1": "第 1 步 · 模板与上传", "impStep1Hint": "下载模板，按四张表（产品 / 规格 / 图片 / 配件）靠「型号」填好，再上传预览。导入将写入工厂", "downloadTpl": "下载模板", "parsing": "解析中…", "pickFile": "选择 .xlsx / .csv", "impStep2": "第 2 步 · 预览（尚未写库）", "reselect": "重选文件", "create": "新增", "update": "更新", "errorRows": "错误行", "linkRows": "配件关系", "specN": "规格 {n} 行", "imageN": "图片 {n} 行", "totalProd": "共 {n} 个产品", "action": "动作", "model": "型号", "name": "名称", "specImg": "规格/图", "errorsSkip": "{n} 行有问题，将被跳过", "errorReport": "错误报告 CSV", "moreRows": "… 还有 {n} 行，请下载完整报告", "importing": "导入中…", "confirmImport": "确认导入 {n} 个产品", "noValid": "没有可导入的有效产品行", "previewFail": "预览失败", "importFail": "导入失败",
+    "impDone": "导入完成：新增 {created}，更新 {updated}，配件关系 {linkRows}",
+    "impDoneSkip": "，跳过错误 {n} 行",
+    "impCsvHeader": "工作表,行号,型号,错误原因",
+    "impNotSel": "（未选择）",
+    "impRowLabel": "[{sheet} 第 {row} 行]",
+    "facBrand": "品牌", "facName": "名称", "facNameHelp": "工厂正式名称，公开页脚 © 行使用", "facShort": "顶栏简称", "facShortHelp": "如 SYSLED / LUMOS·LED，建议 ≤ 12 个字符", "facLogoHelp": "粘贴 logo 图片直链；上传通道待 R2 配置后启用", "facTheme": "主色", "facAccent": "品牌色", "facAccentHelp": "租户品牌色，运行时注入产品页主题色。", "facContact": "联系方式", "facEmailHelp": "询盘按钮的 mailto 目标", "facWhatsappHelp": "E.164 格式，如 +8613800001234", "facNote": "询盘区文案", "facNoteHelp": "显示在询盘按钮上方一行。",
+    "facBack": "全部工厂",
+    "anaTitle": "运营数据", "anaCoverage": "内容覆盖度", "anaTarget": "译文目标 · {n} 语", "anaProducts": "产品总数", "anaReady": "全语言就绪", "anaNoShowcase": "缺展示", "anaTodo": "待补", "anaAllGood": "✓ 全部产品都有展示内容且译文齐全、无过期。", "anaTodoList": "待补清单（{n}）", "anaMore": "… 还有 {n} 个", "anaTransN": "译文 {a}/{b}", "anaStale": "译文过期", "anaNoScans": "近 30 天还没有扫码记录。导出带渠道码的二维码贴到产品 / 包装上即可开始统计。", "anaOverview": "30 天概览", "anaPeak": "峰值日", "anaTotalScans": "总扫码", "anaPdf": "PDF 下载", "anaConv": "下载转化", "anaActiveProd": "被扫产品", "anaTopProd": "热门产品", "anaBySource": "来源渠道", "anaDirect": "直接访问 / 无渠道码", "anaByLang": "语言分布", "anaByRegion": "地区分布（前 8）", "anaUnknown": "未知",
+    "anaRange": "近 30 天 · {a} → {b}",
+    "anaNoFactory": "未找到工厂记录，请先运行 db:seed",
+    "anaNoScansTitle": "暂无扫码",
+    "anaDaysAgo": "30 天前",
+    "anaTodayLabel": "今天", "subProducts": "产品", "subCats": "分类", "subSeries": "系列",
+    "emptyProducts": "当前工厂还没有产品，点击右上角「从主站同步产品」或到「导入」上传"
+  },
   "product": {
     "header": {
       "datasheetTag": "· Datasheet",
