@@ -1,6 +1,8 @@
 import { Download, FileSpreadsheet } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
+import { getAdminLocale } from "@/lib/admin-locale";
 import { ImportWizard } from "@/components/import-wizard";
 import { AutofillShowcasePanel } from "@/components/autofill-showcase-panel";
 import { countMissingShowcase } from "@/app/admin/products/actions";
@@ -13,6 +15,7 @@ function fmtTime(d: Date) {
 
 export default async function AdminImportPage() {
   const factory = await getActiveFactory();
+  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin.page" });
   const [missingShowcase, jobs] = factory
     ? await Promise.all([
         countMissingShowcase(),
@@ -27,7 +30,7 @@ export default async function AdminImportPage() {
   return (
     <div>
       <div>
-        <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">批量导入</h1>
+        <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">{t("import")}</h1>
         <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
           多 Sheet 工作簿一次导入产品、规格、图片与配件关系 · 先预览再写库
         </p>

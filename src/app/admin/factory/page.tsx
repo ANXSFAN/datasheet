@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
+import { getAdminLocale } from "@/lib/admin-locale";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminFactoryListPage() {
+  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin.page" });
   const factories = await prisma.factory.findMany({
     orderBy: { name: "asc" },
     include: { _count: { select: { products: true } } },
@@ -13,7 +16,7 @@ export default async function AdminFactoryListPage() {
   return (
     <div>
       <div>
-        <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">工厂 / 租户</h1>
+        <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">{t("factories")}</h1>
         <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
           共 {factories.length} 家工厂 · 编辑品牌、联系方式与主题色
         </p>

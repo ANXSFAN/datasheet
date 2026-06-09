@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getActiveFactory } from "@/lib/active-factory";
+import { getAdminLocale } from "@/lib/admin-locale";
 import {
   parseHighlights,
   parseApplications,
@@ -22,6 +24,7 @@ function dateKey(d: Date) {
 
 export default async function AdminAnalyticsPage() {
   const factory = await getActiveFactory();
+  const t = await getTranslations({ locale: await getAdminLocale(), namespace: "admin.page" });
 
   // Intentional: page is `force-dynamic`, every render must use current time.
   // eslint-disable-next-line react-hooks/purity
@@ -169,7 +172,7 @@ export default async function AdminAnalyticsPage() {
     <div>
       <div>
         <h1 className="headline-lg text-[26px] text-[var(--color-ink)]">
-          运营数据
+          {t("analytics")}
         </h1>
         <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
           {factory ? (
