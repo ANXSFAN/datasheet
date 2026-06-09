@@ -559,7 +559,6 @@ export function ShowcaseEditor({
               }`}
             >
               {LOCALE_LABELS[loc]}
-              {isSrc ? ` ·${s("src")}` : ""}
             </button>
           );
         })}

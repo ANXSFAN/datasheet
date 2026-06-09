@@ -16,11 +16,11 @@
   --color-rule: #d2d2d7;
   --color-rule-strong: #86868b;
 
-  /* Accent — a living Apple-blue default so icons / highlights / spec viz read
-     with depth instead of dead grey. Per-tenant white-label colour
-     (factory.accentColor) overrides --color-accent at runtime when set. */
-  --color-accent: #0071e3;
-  --color-accent-soft: #0058b0;
+  /* Accent — a restrained warm orange-red, fitting for a lighting brand
+     (the mood is light/warmth, not cold tech-blue). Per-tenant white-label
+     colour (factory.accentColor) overrides --color-accent at runtime when set. */
+  --color-accent: #d9482a;
+  --color-accent-soft: #b1361d;
 
   /* Radius scale — Apple */
   --radius: 10px;

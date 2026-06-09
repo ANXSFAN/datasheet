@@ -298,7 +298,6 @@ export type PdfProductInput = {
   specs: ProductSpec[];
   coverImageBytes: Uint8Array | null;
   documents: { title: string; fileName: string; fileUrl: string }[];
-  factory: { name: string; brandShort: string | null };
   url: string;
   /** Document reference code; renamed from `ref` to avoid React ref semantics. */
   docRef: string;
@@ -361,29 +360,24 @@ export function ProductPdf({
   specs,
   coverImageBytes,
   documents,
-  factory,
   url,
   docRef,
   updated,
   qrDataUrl,
 }: PdfProductInput) {
-  const brandShort = factory.brandShort ?? factory.name;
   const specGroups = groupSpecsForPdf(specs);
 
   return (
+    // 纯展示定位：PDF 不带任何工厂 / 品牌署名（标题、作者、页眉、字段均不含厂家信息）。
     <Document
       title={`${modelNumber} · ${name}`}
-      author={factory.name}
       creator="Datasheet Portal"
       producer="Datasheet Portal"
     >
       <Page size="A4" style={styles.page}>
-        {/* Top brand strip */}
+        {/* Top strip — neutral datasheet mark, no brand */}
         <View style={styles.headerRow} fixed>
-          <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-            <Text style={styles.brand}>{brandShort.toUpperCase()}</Text>
-            <Text style={styles.brandTag}>· DATASHEET</Text>
-          </View>
+          <Text style={styles.brand}>DATASHEET</Text>
           <Text style={styles.headerMeta}>
             REF · {docRef}    REV · {updated}
           </Text>
@@ -391,10 +385,7 @@ export function ProductPdf({
 
         {/* §01 Identification */}
         <View>
-          <View style={{ marginTop: 24 }}>
-            <Kicker>{factory.name}</Kicker>
-          </View>
-          <Text style={styles.h1}>{name}</Text>
+          <Text style={[styles.h1, { marginTop: 24 }]}>{name}</Text>
           <Text style={styles.model}>{modelNumber}</Text>
 
           {description && (
@@ -415,10 +406,6 @@ export function ProductPdf({
             <View style={styles.identCell}>
               <Text style={styles.identLabel}>MODEL</Text>
               <Text style={styles.identValueMono}>{modelNumber}</Text>
-            </View>
-            <View style={styles.identCell}>
-              <Text style={styles.identLabel}>MANUFACTURER</Text>
-              <Text style={styles.identValue}>{brandShort}</Text>
             </View>
             <View style={styles.identCell}>
               <Text style={styles.identLabel}>REF</Text>

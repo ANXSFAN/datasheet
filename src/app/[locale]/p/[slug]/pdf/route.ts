@@ -78,10 +78,6 @@ export async function GET(_req: Request, ctx: RouteContext) {
         fileName: d.fileName,
         fileUrl: d.fileUrl,
       })),
-      factory: {
-        name: product.factory.name,
-        brandShort: product.factory.brandShort,
-      },
       url,
       docRef,
       updated,

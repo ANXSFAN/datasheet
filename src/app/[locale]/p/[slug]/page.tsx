@@ -1371,6 +1371,7 @@ function BoxList({ items, note }: { items: BoxItem[]; note: string }) {
 
 // 配光示意：对称角画侧视光锥（多挡并排），双轴非对称画俯视光斑椭圆。全部按真实角度现画。
 function BeamDiagram({ beam }: { beam: Beam }) {
+  const single = beam.mode === "cone" && beam.angles.length === 1;
   return (
     <div className="rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface-sunken)] p-5 sm:p-6">
       <div className="mb-4 flex items-center gap-3">
@@ -1386,17 +1387,15 @@ function BeamDiagram({ beam }: { beam: Beam }) {
         </span>
       </div>
       {beam.mode === "cone" ? (
-        <div
-          className={
-            beam.angles.length === 1
-              ? "max-w-[150px]"
-              : "grid grid-cols-2 gap-3 sm:grid-cols-4"
-          }
-        >
-          {beam.angles.map((a) => (
-            <BeamCone key={a} angle={a} />
-          ))}
-        </div>
+        single ? (
+          <BeamHero angle={beam.angles[0]} />
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {beam.angles.map((a) => (
+              <BeamCone key={a} angle={a} />
+            ))}
+          </div>
+        )
       ) : (
         <BeamFootprint major={beam.major} minor={beam.minor} />
       )}
@@ -1404,60 +1403,124 @@ function BeamDiagram({ beam }: { beam: Beam }) {
   );
 }
 
-// 侧视光锥（透视，柔和灰）：精致筒灯符号 → 渐变光束自然衰减 → 透视落地光斑。窄角细高、宽角矮胖。
-function BeamCone({ angle }: { angle: number }) {
+// 单角度的「主视」布局：左侧暖光光锥 + 右侧大角度数字 + 窄↔宽刻度尺，填满整行（不再甩一个孤零小卡片）。
+function BeamHero({ angle }: { angle: number }) {
+  return (
+    <div className="flex flex-col items-stretch gap-5 sm:flex-row sm:items-center sm:gap-8">
+      <div className="flex shrink-0 items-center justify-center rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] px-6 py-5 sm:w-[208px]">
+        <BeamCone angle={angle} hero />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-display text-[44px] font-semibold leading-none tabular-nums text-[var(--color-ink)]">
+            {angle}
+          </span>
+          <span className="font-display text-[24px] font-medium leading-none text-[var(--color-accent)]">
+            °
+          </span>
+        </div>
+        <BeamScale angle={angle} />
+      </div>
+    </div>
+  );
+}
+
+// 角度位置尺（窄 10° ↔ 宽 120°）：纯几何示意，标尺只标度数 → 零文案、9 语言通用。
+function BeamScale({ angle }: { angle: number }) {
+  const MIN = 10;
+  const MAX = 120;
+  const pct =
+    ((Math.min(Math.max(angle, MIN), MAX) - MIN) / (MAX - MIN)) * 100;
+  return (
+    <div className="mt-5 max-w-[360px]">
+      <div className="relative h-1.5 w-full rounded-full bg-[var(--color-rule)]">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full bg-[var(--color-accent)]"
+          style={{ width: `${pct}%` }}
+        />
+        <div
+          className="absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--color-surface)] bg-[var(--color-accent)] shadow-sm"
+          style={{ left: `${pct}%` }}
+        />
+      </div>
+      <div className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--color-ink-faint)]">
+        <span>10°</span>
+        <span>120°</span>
+      </div>
+    </div>
+  );
+}
+
+// 侧视光锥：暖光渐变光束（accent 色，像真的灯光而非剪贴图标）→ 落地光池晕开 → 透视光斑 → 精致筒灯。窄角细高、宽角矮胖。
+function BeamCone({ angle, hero = false }: { angle: number; hero?: boolean }) {
   const VB = 132;
-  const VH = 124;
+  const VH = 120;
   const cx = VB / 2;
-  const lampY = 30;
-  const groundY = 100;
+  const lampY = 26;
+  const groundY = 96;
   const H = groundY - lampY;
-  const maxHalfW = 48;
+  const maxHalfW = 46;
   const clamped = Math.min(Math.max(angle, 5), 170);
   const tan = Math.tan((clamped / 2) * (Math.PI / 180));
   const dx = Math.min(H * tan, maxHalfW);
-  const ry = Math.max(3, dx * 0.22);
+  const ry = Math.max(3, dx * 0.24);
   const lx = cx - dx;
   const rx = cx + dx;
+  const accent = "var(--color-accent)";
   const ink = "var(--color-ink)";
-  const gid = `bc${angle}`;
+  const gid = `bcg${angle}`;
+  const pid = `bcp${angle}`;
   return (
-    <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] px-3 py-5">
+    <div
+      className={
+        hero
+          ? "flex w-full flex-col items-center"
+          : "flex flex-col items-center gap-2.5 rounded-2xl border border-[var(--color-rule)] bg-[var(--color-surface)] px-3 py-5"
+      }
+    >
       <svg
         viewBox={`0 0 ${VB} ${VH}`}
-        className="w-full max-w-[132px]"
+        className={hero ? "w-full max-w-[150px]" : "w-full max-w-[120px]"}
         role="img"
         aria-label={`${angle}°`}
       >
         <defs>
           <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={ink} stopOpacity="0.18" />
-            <stop offset="72%" stopColor={ink} stopOpacity="0.04" />
-            <stop offset="100%" stopColor={ink} stopOpacity="0" />
+            <stop offset="0%" stopColor={accent} stopOpacity="0.34" />
+            <stop offset="68%" stopColor={accent} stopOpacity="0.08" />
+            <stop offset="100%" stopColor={accent} stopOpacity="0" />
           </linearGradient>
+          <radialGradient id={pid} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={accent} stopOpacity="0.28" />
+            <stop offset="100%" stopColor={accent} stopOpacity="0" />
+          </radialGradient>
         </defs>
-        {/* 柔和光束：无硬描边，靠渐变自然衰减 */}
+        {/* 落地光池：暖光晕开 */}
+        <ellipse cx={cx} cy={groundY} rx={dx} ry={ry} fill={`url(#${pid})`} />
+        {/* 暖光光束：靠渐变自然衰减 */}
         <path
           d={`M ${cx} ${lampY} L ${lx} ${groundY} A ${dx} ${ry} 0 0 0 ${rx} ${groundY} Z`}
           fill={`url(#${gid})`}
         />
-        {/* 极淡的边导引线 */}
-        <line x1={cx} y1={lampY} x2={lx} y2={groundY} stroke={ink} strokeWidth="0.75" strokeOpacity="0.28" />
-        <line x1={cx} y1={lampY} x2={rx} y2={groundY} stroke={ink} strokeWidth="0.75" strokeOpacity="0.28" />
+        {/* 束缘导引线（暖光淡描边） */}
+        <line x1={cx} y1={lampY} x2={lx} y2={groundY} stroke={accent} strokeWidth="0.9" strokeOpacity="0.5" />
+        <line x1={cx} y1={lampY} x2={rx} y2={groundY} stroke={accent} strokeWidth="0.9" strokeOpacity="0.5" />
         {/* 透视落地光斑（前缘实、背缘虚） */}
-        <path d={`M ${lx} ${groundY} A ${dx} ${ry} 0 0 0 ${rx} ${groundY}`} fill="none" stroke={ink} strokeWidth="0.9" strokeOpacity="0.5" />
-        <path d={`M ${lx} ${groundY} A ${dx} ${ry} 0 0 1 ${rx} ${groundY}`} fill="none" stroke={ink} strokeWidth="0.8" strokeOpacity="0.22" strokeDasharray="2 2.5" />
-        {/* 精致筒灯符号：吸顶条 + 反射杯 */}
-        <rect x={cx - 11} y={lampY - 13} width="22" height="3.5" rx="1.75" fill={ink} />
+        <path d={`M ${lx} ${groundY} A ${dx} ${ry} 0 0 0 ${rx} ${groundY}`} fill="none" stroke={accent} strokeWidth="1" strokeOpacity="0.65" />
+        <path d={`M ${lx} ${groundY} A ${dx} ${ry} 0 0 1 ${rx} ${groundY}`} fill="none" stroke={accent} strokeWidth="0.9" strokeOpacity="0.28" strokeDasharray="2 2.5" />
+        {/* 精致筒灯符号：吸顶板 + 反射杯 + 暖芯 */}
+        <rect x={cx - 11} y={lampY - 12} width="22" height="3.5" rx="1.75" fill={ink} />
         <path
-          d={`M ${cx - 8} ${lampY - 9} L ${cx + 8} ${lampY - 9} L ${cx + 4.5} ${lampY} L ${cx - 4.5} ${lampY} Z`}
+          d={`M ${cx - 8} ${lampY - 8} L ${cx + 8} ${lampY - 8} L ${cx + 4.5} ${lampY} L ${cx - 4.5} ${lampY} Z`}
           fill={ink}
         />
-        <circle cx={cx} cy={lampY - 1.5} r="1.6" fill="var(--color-surface)" />
+        <circle cx={cx} cy={lampY - 1} r="1.7" fill={accent} />
       </svg>
-      <span className="font-mono text-[15px] font-semibold tabular-nums text-[var(--color-ink)]">
-        {angle}°
-      </span>
+      {!hero && (
+        <span className="font-mono text-[14px] font-semibold tabular-nums text-[var(--color-ink)]">
+          {angle}°
+        </span>
+      )}
     </div>
   );
 }
