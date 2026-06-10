@@ -18,10 +18,15 @@ import {
   FolderTree,
   Tag,
   Boxes,
+  Copy as CopyIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { bulkDeleteProducts, createProduct } from "@/app/admin/products/actions";
+import {
+  bulkDeleteProducts,
+  createProduct,
+  duplicateProduct,
+} from "@/app/admin/products/actions";
 import {
   assignProductsToCategory,
   assignProductsToSeries,
@@ -672,6 +677,22 @@ function Row({
   inGroup?: boolean;
 }) {
   const t = useTranslations("admin");
+  const tp = useTranslations("prod");
+  const router = useRouter();
+  const [copying, startCopy] = useTransition();
+
+  function copy() {
+    startCopy(async () => {
+      try {
+        const id = await duplicateProduct({ productId: p.id });
+        toast.success(tp("duplicatedOk"));
+        router.push(`/admin/products/${id}`);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "操作失败");
+      }
+    });
+  }
+
   return (
     <li
       className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
@@ -743,6 +764,20 @@ function Row({
           <ChevronRight className="h-4 w-4" />
         </div>
       </Link>
+      <button
+        type="button"
+        onClick={copy}
+        disabled={copying}
+        title={tp("duplicate")}
+        aria-label={tp("duplicate")}
+        className="shrink-0 rounded-lg p-1.5 text-[var(--color-ink-faint)] transition hover:bg-[var(--color-surface-deep)] hover:text-[var(--color-ink)] disabled:opacity-50"
+      >
+        {copying ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <CopyIcon className="h-4 w-4" />
+        )}
+      </button>
     </li>
   );
 }
