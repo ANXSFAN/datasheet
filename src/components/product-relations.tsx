@@ -11,6 +11,7 @@ import {
   addAccessoryByModel,
   removeLink,
 } from "@/app/admin/products/actions";
+import type { AttrDefLite } from "@/lib/attribute-defaults";
 
 // label 走 misc 命名空间的 i18n key；value 仍是入库的类目代码
 const CATEGORY_OPTIONS: { value: string; labelKey: string }[] = [
@@ -56,7 +57,8 @@ interface Props {
   productId: string;
   category: string | null;
   series: string | null;
-  attributes: { pcbWidth?: string; voltage?: string; watt?: number };
+  attributes: Record<string, string | number>;
+  attrDefs: AttrDefLite[];
   links: LinkItem[];
   suggestions: SuggestionItem[];
   candidateModels: string[];
@@ -77,6 +79,7 @@ export function ProductRelations({
   category,
   series,
   attributes,
+  attrDefs,
   links,
   suggestions,
   candidateModels,
@@ -86,12 +89,21 @@ export function ProductRelations({
   const tc = useTranslations("admin.common");
   const [pending, startTransition] = useTransition();
 
-  // 属性表单
+  // 属性表单：行集合 = 字典 key ∪ 产品已存 key（字典删项后旧数据不静默丢失）
+  const attrRows: { key: string; def?: AttrDefLite }[] = [
+    ...attrDefs.map((d) => ({ key: d.key, def: d })),
+    ...Object.keys(attributes)
+      .filter((k) => !attrDefs.some((d) => d.key === k))
+      .map((k) => ({ key: k })),
+  ];
   const [cat, setCat] = useState(category ?? "");
   const [ser, setSer] = useState(series ?? "");
-  const [pcb, setPcb] = useState(attributes.pcbWidth ?? "");
-  const [volt, setVolt] = useState(attributes.voltage ?? "");
-  const [watt, setWatt] = useState(attributes.watt != null ? String(attributes.watt) : "");
+  const [attrVals, setAttrVals] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    for (const r of attrRows)
+      init[r.key] = attributes[r.key] != null ? String(attributes[r.key]) : "";
+    return init;
+  });
 
   // 手动关联表单
   const [addModel, setAddModel] = useState("");
@@ -142,31 +154,47 @@ export function ProductRelations({
             </Field>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Field label={t("pcb")}>
-              <input
-                value={pcb}
-                onChange={(e) => setPcb(e.target.value)}
-                placeholder={t("pcbPh")}
-                className="form-input font-mono"
-              />
-            </Field>
-            <Field label={t("voltage")}>
-              <input
-                value={volt}
-                onChange={(e) => setVolt(e.target.value)}
-                placeholder={t("voltagePh")}
-                className="form-input font-mono"
-              />
-            </Field>
-            <Field label={t("watt")}>
-              <input
-                value={watt}
-                onChange={(e) => setWatt(e.target.value)}
-                placeholder={t("wattPh")}
-                inputMode="decimal"
-                className="form-input font-mono"
-              />
-            </Field>
+            {attrRows.map(({ key, def }) => (
+              <Field
+                key={key}
+                label={
+                  def ? (
+                    <>
+                      {def.label}
+                      {def.unit ? (
+                        <span className="ml-1 text-[var(--color-ink-faint)]">({def.unit})</span>
+                      ) : null}
+                      <span className="ml-1.5 font-mono text-[10px] text-[var(--color-ink-faint)]">
+                        {key}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="font-mono">{key}</span>
+                  )
+                }
+              >
+                <input
+                  value={attrVals[key] ?? ""}
+                  onChange={(e) =>
+                    setAttrVals((m) => ({ ...m, [key]: e.target.value }))
+                  }
+                  inputMode={def?.type === "number" ? "decimal" : undefined}
+                  list={
+                    def?.type === "select" && def.options.length
+                      ? `attr-opt-${key}`
+                      : undefined
+                  }
+                  className="form-input font-mono"
+                />
+                {def?.type === "select" && def.options.length > 0 && (
+                  <datalist id={`attr-opt-${key}`}>
+                    {def.options.map((o) => (
+                      <option key={o} value={o} />
+                    ))}
+                  </datalist>
+                )}
+              </Field>
+            ))}
           </div>
           <button
             onClick={() =>
@@ -176,9 +204,7 @@ export function ProductRelations({
                     productId,
                     category: cat,
                     series: ser,
-                    pcbWidth: pcb,
-                    voltage: volt,
-                    watt,
+                    attributes: attrVals,
                   }),
                 t("saveAttr"),
               )
@@ -303,7 +329,7 @@ export function ProductRelations({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
       <label className="block text-[12px] font-medium text-[var(--color-ink)]">{label}</label>

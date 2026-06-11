@@ -18,10 +18,13 @@ import {
   parseLocalizedContent,
   parseContentI18n,
   parseSpecs,
+  parseAttributes,
   contentSourceHash,
   type ProductAttributes,
   type LocalizedContent,
 } from "@/lib/products";
+import { listAttributes } from "@/lib/attributes";
+import { ATTR_KEY_RE } from "@/lib/attribute-defaults";
 import { openRouterJSON, type ChatMessage } from "@/lib/ai";
 import { routing, normalizeLocale, type AppLocale } from "@/i18n/routing";
 import { luminaireLabel } from "@/lib/luminaire";
@@ -55,14 +58,16 @@ async function asRelation(v: string): Promise<Relation> {
   return v;
 }
 
-/** 保存产品的类目 / 系列 / 自动匹配属性。 */
+/**
+ * 保存产品的类目 / 系列 / 自动匹配属性。
+ * attributes 按字典过滤：key 须在当前工厂字典内，或产品原本已存（防字典删项后静默丢数据）；
+ * number 型字典项的值收敛为数字（非数字按原文存字符串）；空值 = 删除该属性。
+ */
 export async function saveProductMeta(input: {
   productId: string;
   category: string;
   series: string;
-  pcbWidth: string;
-  voltage: string;
-  watt: string;
+  attributes: Record<string, string>;
 }) {
   const factory = await authedFactory();
   await assertOwned(input.productId, factory.id);
@@ -73,11 +78,28 @@ export async function saveProductMeta(input: {
     category = input.category;
   }
 
+  const [defs, current] = await Promise.all([
+    listAttributes(factory.id),
+    prisma.product.findUnique({
+      where: { id: input.productId },
+      select: { attributes: true },
+    }),
+  ]);
+  const defByKey = new Map(defs.map((d) => [d.key, d]));
+  const existing = parseAttributes(current?.attributes);
+
   const attrs: ProductAttributes = {};
-  if (input.pcbWidth.trim()) attrs.pcbWidth = input.pcbWidth.trim();
-  if (input.voltage.trim()) attrs.voltage = input.voltage.trim();
-  if (input.watt.trim() && Number.isFinite(Number(input.watt))) {
-    attrs.watt = Number(input.watt);
+  for (const [k, raw] of Object.entries(input.attributes ?? {})) {
+    if (!ATTR_KEY_RE.test(k)) continue;
+    const def = defByKey.get(k);
+    if (!def && !(k in existing)) continue;
+    const v = String(raw).trim();
+    if (!v) continue;
+    if (def?.type === "number" && Number.isFinite(Number(v))) {
+      attrs[k] = Number(v);
+    } else {
+      attrs[k] = v.slice(0, 120);
+    }
   }
 
   // 字符串与实体外键同步：category→categoryId(按 kind)、series→seriesId(按名,缺则建)
@@ -303,7 +325,12 @@ export async function translateShowcase(productId: string) {
     install: parseInstall(product.install),
     dimensions: parseDimensionsJson(product.dimensions),
     detailBlocks: parseDetailBlocks(product.detailBlocks),
-    specs: parseSpecs(product.specs),
+    // 字典 key 不属于可翻译内容，发给 AI 前剥掉（防 AI 改坏/回传带 key）
+    specs: parseSpecs(product.specs).map((s) => {
+      const { key: _key, ...rest } = s;
+      void _key;
+      return rest;
+    }),
     docTitles: product.documents.map((d) => d.title),
   };
 
@@ -786,13 +813,22 @@ export async function removeLink(linkId: string, fromId: string) {
  */
 export async function saveProductSpecs(input: {
   productId: string;
-  specs: unknown; // [{ group?, label, value, unit? }]
+  specs: unknown; // [{ group?, label, value, unit?, key? }]
   certifications: unknown; // string[]
 }) {
   const factory = await authedFactory();
   await assertOwned(input.productId, factory.id);
 
-  const specs = parseSpecs(input.specs);
+  // 规格行可挂字典 key；不在当前工厂字典内的 key 剥掉、行保留
+  const validKeys = new Set((await listAttributes(factory.id)).map((d) => d.key));
+  const specs = parseSpecs(input.specs).map((s) => {
+    if (s.key && !validKeys.has(s.key)) {
+      const { key: _key, ...rest } = s;
+      void _key;
+      return rest;
+    }
+    return s;
+  });
   const certifications = Array.isArray(input.certifications)
     ? input.certifications
         .map((c) => String(c).trim())

@@ -2,6 +2,7 @@ import "server-only";
 import * as XLSX from "xlsx";
 import { prisma } from "@/lib/prisma";
 import type { ProductSpec, ProductAttributes } from "@/lib/products";
+import { listAttributes } from "@/lib/attributes";
 
 /**
  * 批量导入：多 Sheet 工作簿（产品 / 规格 / 图片 / 配件），靠"型号"做主键关联。
@@ -40,7 +41,11 @@ const COL = {
   pcbWidth: ["pcb宽度", "pcbwidth", "pcb", "板宽"],
   attrVoltage: ["电压", "voltage"],
   watt: ["功率", "watt", "瓦数"],
+  specKey: ["属性key", "attrkey", "字典key", "key"],
 } satisfies Record<string, string[]>;
+
+/** 固定列的全部表头别名：字典动态属性列与之冲突时，固定列语义优先。 */
+const FIXED_HEADERS = new Set(Object.values(COL).flat());
 
 /** 中文类目 → schema enum；也接受直接填英文 enum。 */
 const CATEGORY_MAP: Record<string, string> = {
@@ -201,6 +206,22 @@ export async function buildPlan(
 ): Promise<BuiltPlan> {
   const errors: RowError[] = [];
 
+  // 属性字典：规格 sheet 的「属性Key」列须在字典内；产品 sheet 按字典动态识别属性列。
+  const attrDefs = await listAttributes(factoryId);
+  const attrKeySet = new Set(attrDefs.map((d) => d.key));
+  const FIXED_ATTR_KEYS = new Set(["pcbWidth", "voltage", "watt"]); // 固定列已覆盖
+  const dynamicAttrCols: { key: string; aliases: string[]; type: string }[] = [];
+  for (const d of attrDefs) {
+    if (FIXED_ATTR_KEYS.has(d.key)) continue;
+    const aliases = [
+      normalizeHeader(d.key),
+      normalizeHeader(d.name),
+      ...(d.nameI18n.zh ? [normalizeHeader(d.nameI18n.zh)] : []),
+      ...(d.nameI18n.en ? [normalizeHeader(d.nameI18n.en)] : []),
+    ].filter((a, i, arr) => a && !FIXED_HEADERS.has(a) && arr.indexOf(a) === i);
+    if (aliases.length) dynamicAttrCols.push({ key: d.key, aliases, type: d.type });
+  }
+
   // 1) 产品行校验
   const products: NormProduct[] = [];
   const productModels = new Set<string>();
@@ -247,6 +268,13 @@ export async function buildPlan(
     if (volt) attrs.voltage = volt;
     const watt = pick(row, COL.watt);
     if (watt && Number.isFinite(Number(watt))) attrs.watt = Number(watt);
+    // 字典动态属性列（key / 源名 / zh / en 译名作表头别名；number 型收敛为数字）
+    for (const c of dynamicAttrCols) {
+      const v = pick(row, c.aliases);
+      if (!v) continue;
+      attrs[c.key] =
+        c.type === "number" && Number.isFinite(Number(v)) ? Number(v) : v;
+    }
 
     productModels.add(model);
     products.push({
@@ -292,11 +320,22 @@ export async function buildPlan(
       errors.push({ sheet: "规格", row: excelRow, model, message: "参数名 / 参数值不能为空" });
       return;
     }
+    const keyRaw = pick(row, COL.specKey);
+    if (keyRaw && !attrKeySet.has(keyRaw)) {
+      errors.push({
+        sheet: "规格",
+        row: excelRow,
+        model,
+        message: `未知属性 key「${keyRaw}」（不在属性字典中，可先到后台「属性」添加）`,
+      });
+      return;
+    }
     const spec: ProductSpec = {
       group: pick(row, COL.group) || undefined,
       label,
       value,
       unit: pick(row, COL.unit) || undefined,
+      key: keyRaw || undefined,
     };
     const arr = specsByModel.get(model) ?? [];
     arr.push(spec);
@@ -599,10 +638,10 @@ export function buildTemplateWorkbook(): Buffer {
     ["PWR-24V-100W", "24V 100W 开关电源", "恒压防水电源", "电源系列", "电源", "CE", "", "", "24V", "100"],
   ];
   const specsAoa = [
-    ["型号", "分组", "参数名", "参数值", "单位"],
-    ["COB-480-24V", "电气", "电压", "24", "V"],
-    ["COB-480-24V", "电气", "功率", "14.4", "W/m"],
-    ["COB-480-24V", "光学", "色温", "3000", "K"],
+    ["型号", "分组", "参数名", "参数值", "单位", "属性Key"],
+    ["COB-480-24V", "电气", "电压", "24", "V", "voltage"],
+    ["COB-480-24V", "电气", "功率", "14.4", "W/m", "watt"],
+    ["COB-480-24V", "光学", "色温", "3000", "K", "cct"],
   ];
   const imagesAoa = [
     ["型号", "图片URL", "说明", "排序"],

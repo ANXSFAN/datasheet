@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { localizedName, parseNameI18n } from "@/lib/catalog";
+import { ATTR_KEY_RE } from "@/lib/attribute-defaults";
 
 export type ProductSpec = {
   /** Optional group label, e.g. "Electrical" / "Photometric" */
@@ -8,6 +9,8 @@ export type ProductSpec = {
   label: string;
   value: string;
   unit?: string;
+  /** 可选：属性字典 key（AttributeDefinition.key）。挂上后前台 label 走字典译名。 */
+  key?: string;
 };
 
 export function findPublicProductBySlug(slug: string) {
@@ -41,28 +44,40 @@ export function parseSpecs(json: unknown): ProductSpec[] {
       label: r.label,
       value: r.value,
       unit: typeof r.unit === "string" ? r.unit : undefined,
+      key:
+        typeof r.key === "string" && ATTR_KEY_RE.test(r.key)
+          ? r.key
+          : undefined,
     });
   }
   return out;
 }
 
-/** 自动匹配用的产品属性（PCB 宽度决定铝槽，电压 + 功率决定电源）。 */
-export type ProductAttributes = {
-  pcbWidth?: string;
-  voltage?: string;
-  watt?: number;
-};
+/**
+ * 自动匹配 / 兼容规则用的产品属性。key 由属性字典（AttributeDefinition）约定，
+ * 值为字符串（可含单位，如 "10mm"）或数字。历史上固定 pcbWidth/voltage/watt 三键，
+ * 现已通用化；matching.ts 的灯带匹配逻辑仍按这三个 key 读取。
+ */
+export type ProductAttributes = Record<string, string | number>;
+
+/** 单个产品 attributes 的 key 数上限（防脏数据无限膨胀）。 */
+const ATTR_MAX_KEYS = 40;
 
 /** Safe runtime parse for the Json `attributes` column. */
 export function parseAttributes(json: unknown): ProductAttributes {
-  if (!json || typeof json !== "object") return {};
-  const r = json as Record<string, unknown>;
+  if (!json || typeof json !== "object" || Array.isArray(json)) return {};
   const out: ProductAttributes = {};
-  if (typeof r.pcbWidth === "string" && r.pcbWidth.trim()) out.pcbWidth = r.pcbWidth.trim();
-  if (typeof r.voltage === "string" && r.voltage.trim()) out.voltage = r.voltage.trim();
-  if (typeof r.watt === "number" && Number.isFinite(r.watt)) out.watt = r.watt;
-  else if (typeof r.watt === "string" && r.watt.trim() && Number.isFinite(Number(r.watt))) {
-    out.watt = Number(r.watt);
+  let n = 0;
+  for (const [k, v] of Object.entries(json as Record<string, unknown>)) {
+    if (n >= ATTR_MAX_KEYS) break;
+    if (!ATTR_KEY_RE.test(k)) continue;
+    if (typeof v === "number" && Number.isFinite(v)) {
+      out[k] = v;
+      n++;
+    } else if (typeof v === "string" && v.trim()) {
+      out[k] = v.trim().slice(0, 120);
+      n++;
+    }
   }
   return out;
 }
@@ -581,8 +596,24 @@ export function localizedField(
 }
 
 /**
+ * 指纹/翻译口径的 specs：只剥 key、零归一化（rest 展开保持属性插入顺序，
+ * 无 key 的存量行 stringify 结果与原 Json 完全一致）。字典 key 不属于"可翻译源内容"
+ * ——挂/解除 key 不应触发译文过期，AI 翻译也不应见到它。
+ */
+export function specsWithoutKeys(specs: unknown): unknown {
+  if (!Array.isArray(specs)) return specs;
+  return specs.map((row) => {
+    if (!row || typeof row !== "object" || Array.isArray(row)) return row;
+    const { key: _key, ...rest } = row as Record<string, unknown>;
+    void _key;
+    return rest;
+  });
+}
+
+/**
  * 计算"可翻译源内容"的指纹（djb2 哈希）。翻译时存下当时的指纹；之后源内容一变，
  * 指纹就对不上 → 译文已过期，提示重翻。入参用原始 DB 字段，确保保存/翻译两侧口径一致。
+ * specs 先剥 key（见 specsWithoutKeys）：挂字典 key 不算源内容变更。
  */
 export function contentSourceHash(p: {
   name: string;
@@ -609,7 +640,7 @@ export function contentSourceHash(p: {
     p.install,
     p.dimensions,
     p.detailBlocks,
-    p.specs,
+    specsWithoutKeys(p.specs),
     p.sourceLocale,
   ]);
   let h = 5381;

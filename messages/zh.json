@@ -9,7 +9,8 @@
       "rules": "配件规则",
       "analytics": "数据",
       "import": "导入",
-      "factories": "工厂"
+      "factories": "工厂",
+      "attributes": "属性"
     },
     "common": {
       "save": "保存",
@@ -67,7 +68,9 @@
       "repModel": "型号",
       "repError": "错误",
       "factoryCount": "共 {n} 家工厂 · 编辑品牌、联系方式与主题色",
-      "factoryEmpty": "暂无工厂记录"
+      "factoryEmpty": "暂无工厂记录",
+      "attributes": "属性字典",
+      "attributesSub": "统一属性 key 与 9 语言名称：供配件匹配、规格表、AI 录入与批量导入共用"
     },
     "dashboard": {
       "last30": "近 30 天",
@@ -208,6 +211,35 @@
       "needTwoCats": "规则需要至少两个分类（主品分类 + 配件分类）。请先到「分类」建好分类树。",
       "savedOk": "规则已保存",
       "appliedFail": "执行失败"
+    },
+    "attr": {
+      "addTitle": "新增属性",
+      "keyLabel": "属性 Key",
+      "keyPh": "cct / pcbWidth",
+      "keyHint": "字母开头，仅字母/数字/下划线；创建后不可修改",
+      "nameLabel": "显示名（多语言）",
+      "namePh": "如 Temperatura de color",
+      "nameHint": "源语言请用西语填写（与产品源内容一致）",
+      "typeLabel": "类型",
+      "typeText": "文本",
+      "typeNumber": "数字",
+      "typeSelect": "枚举",
+      "unitLabel": "单位",
+      "unitPh": "mm / V / W / K",
+      "optionsLabel": "预设选项",
+      "optionsPh": "输入后回车添加",
+      "optionsHint": "语言无关的物理值，如 24V、IP65",
+      "create": "创建",
+      "created": "已创建",
+      "saved": "已保存",
+      "translate": "AI 翻译",
+      "translated": "译名已生成",
+      "deleteConfirm": "删除属性「{name}」？产品里已保存的数据不受影响，仅影响之后的候选列表与多语言译名。",
+      "empty": "还没有属性——可一键预置常用 LED 属性，或新增一个",
+      "seedDefaults": "预置常用属性",
+      "seeded": "已预置 {n} 个常用属性",
+      "moveUp": "上移",
+      "moveDown": "下移"
     }
   },
   "prod": {
@@ -275,7 +307,10 @@
     "statPdf": "PDF 下载",
     "statConv": "下载转化",
     "bySource": "来源渠道",
-    "directSource": "直接访问 / 无渠道码"
+    "directSource": "直接访问 / 无渠道码",
+    "fromDict": "从字典添加",
+    "dict": "字典",
+    "dictHint": "关联字典属性后，参数名按界面/前台语言自动取字典译名"
   },
   "show": {
     "sub": "卖点 · 亮点 · 应用场景 · 图文 · FAQ",
@@ -736,7 +771,12 @@
     "videoNotFound": "视频不存在",
     "aiNoKey": "未配置 OPENROUTER_API_KEY，无法调用 AI",
     "aiEmpty": "AI 返回为空",
-    "aiBadJson": "AI 返回不是合法 JSON"
+    "aiBadJson": "AI 返回不是合法 JSON",
+    "attrNotFound": "属性不存在或不属于当前工厂",
+    "attrKeyRequired": "属性 Key 必填",
+    "attrKeyInvalid": "属性 Key 格式不合法（字母开头，仅字母/数字/下划线）",
+    "attrKeyTaken": "属性 Key「{key}」已存在",
+    "attrNameRequired": "显示名必填"
   },
   "gallery": {
     "zoom": "放大查看",

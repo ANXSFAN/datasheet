@@ -4,6 +4,8 @@ import { getActiveFactory } from "@/lib/active-factory";
 import { getAdminLocale } from "@/lib/admin-locale";
 import { parseConditions } from "@/lib/compat";
 import { localizedName } from "@/lib/catalog";
+import { listAttributes } from "@/lib/attributes";
+import { attrLabel } from "@/lib/attribute-defaults";
 import { RuleManager } from "@/components/rule-manager";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +17,7 @@ export default async function AdminRulesPage() {
   const tc = await getTranslations({ locale, namespace: "admin.common" });
   const tr = await getTranslations({ locale, namespace: "admin.rule" });
 
-  const [categories, rules] = factory
+  const [categories, rules, attrDefs] = factory
     ? await Promise.all([
         prisma.category.findMany({
           where: { factoryId: factory.id },
@@ -26,8 +28,9 @@ export default async function AdminRulesPage() {
           where: { factoryId: factory.id },
           orderBy: [{ priority: "desc" }, { createdAt: "asc" }],
         }),
+        listAttributes(factory.id),
       ])
-    : [[], []];
+    : [[], [], []];
 
   const catNames: Record<string, string> = {};
   for (const c of categories) catNames[c.id] = localizedName(c.name, c.nameI18n, locale);
@@ -74,6 +77,10 @@ export default async function AdminRulesPage() {
               autoLink: r.autoLink,
               enabled: r.enabled,
               priority: r.priority,
+            }))}
+            attrOptions={attrDefs.map((d) => ({
+              key: d.key,
+              label: attrLabel(d, locale),
             }))}
           />
         ))}

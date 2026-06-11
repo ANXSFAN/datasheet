@@ -20,6 +20,8 @@ import {
 import { getAdminLocale } from "@/lib/admin-locale";
 import { getTranslations } from "next-intl/server";
 import { suggestByRules, parseConditions, type CompatRuleData } from "@/lib/compat";
+import { listAttributes } from "@/lib/attributes";
+import { attrLabel, type AttrDefLite } from "@/lib/attribute-defaults";
 import { QrCard } from "@/components/qr-card";
 import { MaterialManager } from "@/components/material-manager";
 import { ProductRelations } from "@/components/product-relations";
@@ -82,7 +84,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
   const tp = await getTranslations({ locale: adminLocale, namespace: "prod" });
 
   // 配件关系 + 规则引擎建议（同工厂候选池）。候选名按后台语言取译名展示。
-  const [rawCandidates, ruleCats, rawRules] = await Promise.all([
+  const [rawCandidates, ruleCats, rawRules, rawAttrDefs] = await Promise.all([
     prisma.product.findMany({
       where: { factoryId: product.factoryId, id: { not: product.id } },
       select: {
@@ -106,7 +108,17 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
       where: { factoryId: product.factoryId, enabled: true },
       orderBy: { priority: "desc" },
     }),
+    listAttributes(product.factoryId),
   ]);
+  // 字典 → 客户端轻量形状（label 按后台语言本地化）
+  const attrDefs: AttrDefLite[] = rawAttrDefs.map((d) => ({
+    key: d.key,
+    label: attrLabel(d, adminLocale),
+    srcName: d.name,
+    unit: d.unit ?? "",
+    type: d.type,
+    options: d.options,
+  }));
   const candidates = rawCandidates.map((c) => ({
     ...c,
     name: localizedProductName(c.name, c.contentI18n, adminLocale),
@@ -244,6 +256,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
     label: s.label,
     value: s.value,
     unit: s.unit ?? "",
+    key: s.key ?? "",
   }));
   const ci = parseContentI18n(product.contentI18n);
   const translatedLocales = Object.keys(ci);
@@ -471,6 +484,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         productId={product.id}
         initialSpecs={initialSpecs}
         initialCerts={product.certifications}
+        attrDefs={attrDefs}
       />
 
       <ShowcaseEditor
@@ -504,6 +518,7 @@ export default async function ProductMaterialsPage({ params }: PageProps) {
         category={product.category}
         series={product.series}
         attributes={attrs}
+        attrDefs={attrDefs}
         links={links}
         suggestions={suggestions}
         candidateModels={candidates.map((c) => c.modelNumber)}

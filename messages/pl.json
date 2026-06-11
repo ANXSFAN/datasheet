@@ -9,7 +9,8 @@
       "rules": "Reguły",
       "analytics": "Statystyki",
       "import": "Import",
-      "factories": "Fabryki"
+      "factories": "Fabryki",
+      "attributes": "Atrybuty"
     },
     "common": {
       "save": "Zapisz",
@@ -67,7 +68,9 @@
       "repModel": "Model",
       "repError": "Błąd",
       "factoryCount": "{n} fabryk — edytuj markę, kontakty i kolor",
-      "factoryEmpty": "Brak fabryk"
+      "factoryEmpty": "Brak fabryk",
+      "attributes": "Słownik atrybutów",
+      "attributesSub": "Ujednolicone klucze atrybutów i nazwy w 9 językach: wspólne dla dopasowania akcesoriów, specyfikacji, AI i importu"
     },
     "dashboard": {
       "last30": "Ostatnie 30 dni",
@@ -208,6 +211,35 @@
       "needTwoCats": "Reguły wymagają co najmniej dwóch kategorii (głównej + akcesoriów). Najpierw utwórz drzewo kategorii.",
       "savedOk": "Reguła zapisana",
       "appliedFail": "Niepowodzenie"
+    },
+    "attr": {
+      "addTitle": "Nowy atrybut",
+      "keyLabel": "Klucz (key)",
+      "keyPh": "cct / pcbWidth",
+      "keyHint": "Zaczyna się literą; tylko litery/cyfry/podkreślnik. Nie można później zmienić",
+      "nameLabel": "Nazwa (wielojęzyczna)",
+      "namePh": "Temperatura de color",
+      "nameHint": "Wpisz nazwę źródłową po hiszpańsku (jak treść źródłowa produktu)",
+      "typeLabel": "Typ",
+      "typeText": "Tekst",
+      "typeNumber": "Liczba",
+      "typeSelect": "Lista opcji",
+      "unitLabel": "Jednostka",
+      "unitPh": "mm / V / W / K",
+      "optionsLabel": "Wartości predefiniowane",
+      "optionsPh": "Wpisz i naciśnij Enter",
+      "optionsHint": "Wartości fizyczne niezależne od języka, np. 24V, IP65",
+      "create": "Utwórz",
+      "created": "Utworzono",
+      "saved": "Zapisano",
+      "translate": "Tłumacz AI",
+      "translated": "Wygenerowano tłumaczenia",
+      "deleteConfirm": "Usunąć atrybut „{name}”? Dane zapisane w produktach pozostaną nienaruszone; wpłynie to tylko na przyszłe podpowiedzi i przetłumaczone nazwy.",
+      "empty": "Brak atrybutów — wstaw typowe atrybuty LED lub utwórz nowy",
+      "seedDefaults": "Wstaw typowe atrybuty",
+      "seeded": "Wstawiono {n} typowych atrybutów",
+      "moveUp": "W górę",
+      "moveDown": "W dół"
     }
   },
   "prod": {
@@ -275,7 +307,10 @@
     "statPdf": "Pobrania PDF",
     "statConv": "Konwersja pobrań",
     "bySource": "Według źródła",
-    "directSource": "Bezpośrednio / bez kodu kanału"
+    "directSource": "Bezpośrednio / bez kodu kanału",
+    "fromDict": "Dodaj ze słownika",
+    "dict": "Słownik",
+    "dictHint": "Po powiązaniu z atrybutem słownika nazwa parametru używa tłumaczenia słownika dla każdego języka"
   },
   "show": {
     "sub": "Zalety · wyróżnienia · zastosowania · szczegóły · FAQ",
@@ -736,7 +771,12 @@
     "videoNotFound": "Wideo nie istnieje",
     "aiNoKey": "Brak konfiguracji OPENROUTER_API_KEY — AI niedostępne",
     "aiEmpty": "AI zwróciło pustą odpowiedź",
-    "aiBadJson": "Odpowiedź AI nie jest poprawnym JSON"
+    "aiBadJson": "Odpowiedź AI nie jest poprawnym JSON",
+    "attrNotFound": "Atrybut nie istnieje lub nie należy do bieżącej fabryki",
+    "attrKeyRequired": "Klucz atrybutu jest wymagany",
+    "attrKeyInvalid": "Nieprawidłowy klucz (zaczyna się literą; tylko litery/cyfry/podkreślnik)",
+    "attrKeyTaken": "Klucz „{key}” już istnieje",
+    "attrNameRequired": "Nazwa jest wymagana"
   },
   "gallery": {
     "zoom": "Powiększ obraz",

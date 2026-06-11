@@ -16,11 +16,18 @@ export function isCategory(v: string | null | undefined): v is Category {
   return !!v && (CATEGORIES as readonly string[]).includes(v);
 }
 
-/** 取字符串里的第一个数字，用于把 "10mm" / "24V" 归一成可比较的数值串。 */
-function normNum(s?: string): string | null {
-  if (!s) return null;
-  const m = s.match(/[\d.]+/);
+/** 取值里的第一个数字，用于把 "10mm" / "24V" / 14.4 归一成可比较的数值串。 */
+function normNum(v?: string | number): string | null {
+  if (v === undefined || v === null) return null;
+  const m = String(v).match(/[\d.]+/);
   return m ? m[0] : null;
+}
+
+/** 属性值 → 有限数字；非数字 → null（attributes 通用化后值可能是字符串）。 */
+function numOf(v?: string | number): number | null {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  const s = normNum(v);
+  return s !== null && Number.isFinite(Number(s)) ? Number(s) : null;
 }
 
 export interface MatchCandidate {
@@ -73,9 +80,11 @@ export function suggestAccessories(
         reason: `PCB 宽度 ${current.attributes.pcbWidth} 匹配`,
       });
     } else if (c.category === "power" && volt && normNum(c.attributes.voltage) === volt) {
+      const curWatt = numOf(current.attributes.watt);
+      const candWatt = numOf(c.attributes.watt);
       const wattHint =
-        current.attributes.watt && c.attributes.watt
-          ? `；电源 ${c.attributes.watt}W ${c.attributes.watt >= current.attributes.watt ? "≥" : "<"} 灯带 ${current.attributes.watt}W/m`
+        curWatt !== null && candWatt !== null
+          ? `；电源 ${candWatt}W ${candWatt >= curWatt ? "≥" : "<"} 灯带 ${curWatt}W/m`
           : "";
       out.push({
         toId: c.id,

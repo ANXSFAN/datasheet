@@ -19,6 +19,7 @@ import {
   type ProductAttributes,
 } from "@/lib/products";
 import { openRouterJSONRich, type ContentPart } from "@/lib/ai";
+import { listAttributes, type AttrDef } from "@/lib/attributes";
 import { adminErr } from "@/lib/admin-err";
 import { isR2Url, deleteFromR2 } from "@/lib/r2";
 import { routing, normalizeLocale } from "@/i18n/routing";
@@ -95,8 +96,11 @@ export type PdfDraftField =
 const str = (v: unknown): string | null =>
   typeof v === "string" && v.trim() ? v.trim() : null;
 
-/** 把 AI 返回（或客户端回传）的 unknown 清洗成 PdfDraft：非法项静默丢弃。 */
-function cleanDraft(raw: unknown): PdfDraft {
+/**
+ * 把 AI 返回（或客户端回传）的 unknown 清洗成 PdfDraft：非法项静默丢弃。
+ * attributes 按当前工厂字典过滤：不在字典内的 key 丢弃，number 型收敛为数字。
+ */
+function cleanDraft(raw: unknown, attrDefs: AttrDef[]): PdfDraft {
   const r = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const fixIcon = <T extends { icon: string }>(x: T): T =>
     ICON_KEYS.includes(x.icon) ? x : { ...x, icon: "dot" };
@@ -112,13 +116,17 @@ function cleanDraft(raw: unknown): PdfDraft {
   const attrsRaw = (r.attributes && typeof r.attributes === "object"
     ? r.attributes
     : {}) as Record<string, unknown>;
+  const defByKey = new Map(attrDefs.map((d) => [d.key, d]));
   const attributes: ProductAttributes = {};
-  const pcb = str(attrsRaw.pcbWidth);
-  const volt = str(attrsRaw.voltage);
-  if (pcb) attributes.pcbWidth = pcb;
-  if (volt) attributes.voltage = volt;
-  if (Number.isFinite(Number(attrsRaw.watt)) && attrsRaw.watt !== null && attrsRaw.watt !== "") {
-    attributes.watt = Number(attrsRaw.watt);
+  for (const [k, v] of Object.entries(attrsRaw)) {
+    const def = defByKey.get(k);
+    if (!def) continue;
+    if (def.type === "number" && v !== null && v !== "" && Number.isFinite(Number(v))) {
+      attributes[k] = Number(v);
+    } else {
+      const s = str(v);
+      if (s) attributes[k] = s.slice(0, 120);
+    }
   }
 
   return {
@@ -186,8 +194,31 @@ async function fetchPdfBytes(pdfUrl: string): Promise<Buffer> {
   return buf;
 }
 
+/** 字典 → prompt 里的 attributes 字段说明（key + 名称 + 单位 + 枚举候选）。 */
+function attrSchemaLine(attrDefs: AttrDef[]): string {
+  if (!attrDefs.length) return `  "attributes": {},\n`;
+  const fields = attrDefs
+    .map((d) => {
+      const desc = [
+        d.name,
+        d.type === "number" ? "数字" : "",
+        d.unit ? `单位 ${d.unit}` : "",
+        d.options.length ? `只能选: ${d.options.join(" / ")}` : "",
+      ]
+        .filter(Boolean)
+        .join("，");
+      return `"${d.key}": "${desc}"`;
+    })
+    .join(", ");
+  return `  "attributes": {${fields}} 只填文档明确写了的属性，其余省略,\n`;
+}
+
 /** PDF 字节 → AI 抽取草稿。供编辑页填充与「从 PDF 新建」共用。 */
-async function extractDraft(pdf: Buffer, fileName: string): Promise<PdfDraft> {
+async function extractDraft(
+  pdf: Buffer,
+  fileName: string,
+  attrDefs: AttrDef[],
+): Promise<PdfDraft> {
   const system =
     "你是照明产品技术文档的字段抽取器。从用户给的 PDF 中抽取产品资料，输出一个 JSON 对象。" +
     "铁律：你是搬运工不是作者——只输出文档里明确写了的信息；文档里没有的字段一律给 null 或空数组，" +
@@ -206,7 +237,7 @@ async function extractDraft(pdf: Buffer, fileName: string): Promise<PdfDraft> {
     `  "sourceLocale": "文档正文主要语言，只能选: ${routing.locales.join(", ")}，其他语言给 null",\n` +
     `  "specs": [{"group":"分组(如 电气/光学/物理/环境，用文档语言)","label":"参数名","value":"参数值","unit":"单位(可选)"}],\n` +
     `  "certifications": ["认证标志，如 CE, RoHS, IP65, UL"],\n` +
-    `  "attributes": {"pcbWidth":"PCB/灯板宽度(灯带类才有,含单位,如 10mm)","voltage":"工作电压(如 DC24V / AC220-240V)","watt": 功率数字},\n` +
+    attrSchemaLine(attrDefs) +
     `  "highlights": [{"icon":"只能选: ${ICON_KEYS.join(", ")}","label":"亮点说明","value":"短数值(可选,如 IP65)"}],\n` +
     `  "boxContents": [{"item":"盒内物品","qty":"数量(可选,如 ×1)"}] 仅文档明确列了包装清单才填,\n` +
     `  "install": {"method":"安装方式一句话","steps":["步骤1","步骤2"]} 仅文档有安装说明才填,\n` +
@@ -232,7 +263,7 @@ async function extractDraft(pdf: Buffer, fileName: string): Promise<PdfDraft> {
     ],
     { temperature: 0.1 },
   );
-  return cleanDraft(raw);
+  return cleanDraft(raw, attrDefs);
 }
 
 /**
@@ -243,9 +274,10 @@ export async function extractProductFromPdf(input: {
   pdfUrl: string;
   fileName?: string;
 }): Promise<PdfDraft> {
-  await authedFactory();
+  const factory = await authedFactory();
+  const attrDefs = await listAttributes(factory.id);
   const bytes = await fetchPdfBytes(input.pdfUrl);
-  return extractDraft(bytes, input.fileName ?? "datasheet.pdf");
+  return extractDraft(bytes, input.fileName ?? "datasheet.pdf", attrDefs);
 }
 
 /**
@@ -260,7 +292,7 @@ export async function applyProductPdfDraft(input: {
   const factory = await authedFactory();
   await assertOwned(input.productId, factory.id);
 
-  const draft = cleanDraft(input.draft);
+  const draft = cleanDraft(input.draft, await listAttributes(factory.id));
   const fields = input.fields.filter(
     (f) => ALL_FIELDS.includes(f) && draftHas(draft, f),
   );
@@ -330,9 +362,10 @@ export async function createProductFromPdf(input: {
   categoryId?: string | null;
   seriesId?: string | null;
 }): Promise<string> {
-  await authedFactory();
+  const factory = await authedFactory();
+  const attrDefs = await listAttributes(factory.id);
   const bytes = await fetchPdfBytes(input.pdfUrl);
-  const draft = await extractDraft(bytes, input.fileName ?? "datasheet.pdf");
+  const draft = await extractDraft(bytes, input.fileName ?? "datasheet.pdf", attrDefs);
 
   if (!draft.modelNumber) {
     throw await adminErr("pdfNoModel");

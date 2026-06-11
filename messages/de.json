@@ -9,7 +9,8 @@
       "rules": "Regeln",
       "analytics": "Statistiken",
       "import": "Import",
-      "factories": "Werke"
+      "factories": "Werke",
+      "attributes": "Attribute"
     },
     "common": {
       "save": "Speichern",
@@ -67,7 +68,9 @@
       "repModel": "Modell",
       "repError": "Fehler",
       "factoryCount": "{n} Werke — Marke, Kontakt und Farbe bearbeiten",
-      "factoryEmpty": "Noch keine Werke"
+      "factoryEmpty": "Noch keine Werke",
+      "attributes": "Attribut-Wörterbuch",
+      "attributesSub": "Einheitliche Attribut-Keys und Namen in 9 Sprachen – genutzt von Zubehör-Matching, Spezifikationen, KI-Erfassung und Import"
     },
     "dashboard": {
       "last30": "Letzte 30 Tage",
@@ -208,6 +211,35 @@
       "needTwoCats": "Regeln brauchen mindestens zwei Kategorien (Haupt + Zubehör). Erstellen Sie zuerst Ihren Kategorienbaum.",
       "savedOk": "Regel gespeichert",
       "appliedFail": "Fehlgeschlagen"
+    },
+    "attr": {
+      "addTitle": "Neues Attribut",
+      "keyLabel": "Key",
+      "keyPh": "cct / pcbWidth",
+      "keyHint": "Beginnt mit Buchstabe; nur Buchstaben/Ziffern/Unterstrich. Später nicht änderbar",
+      "nameLabel": "Name (mehrsprachig)",
+      "namePh": "Temperatura de color",
+      "nameHint": "Quellnamen auf Spanisch eingeben (wie der Produkt-Quellinhalt)",
+      "typeLabel": "Typ",
+      "typeText": "Text",
+      "typeNumber": "Zahl",
+      "typeSelect": "Auswahl",
+      "unitLabel": "Einheit",
+      "unitPh": "mm / V / W / K",
+      "optionsLabel": "Vordefinierte Werte",
+      "optionsPh": "Eingeben und Enter drücken",
+      "optionsHint": "Sprachunabhängige physikalische Werte, z. B. 24V, IP65",
+      "create": "Erstellen",
+      "created": "Erstellt",
+      "saved": "Gespeichert",
+      "translate": "KI-Übersetzung",
+      "translated": "Übersetzungen erstellt",
+      "deleteConfirm": "Attribut „{name}“ löschen? Bereits gespeicherte Produktdaten bleiben unberührt; betroffen sind nur künftige Vorschläge und übersetzte Namen.",
+      "empty": "Noch keine Attribute – übliche LED-Attribute vorbefüllen oder neu anlegen",
+      "seedDefaults": "Übliche Attribute vorbefüllen",
+      "seeded": "{n} übliche Attribute vorbefüllt",
+      "moveUp": "Nach oben",
+      "moveDown": "Nach unten"
     }
   },
   "prod": {
@@ -275,7 +307,10 @@
     "statPdf": "PDF-Downloads",
     "statConv": "Download-Konversion",
     "bySource": "Nach Quelle",
-    "directSource": "Direkt / ohne Kanalcode"
+    "directSource": "Direkt / ohne Kanalcode",
+    "fromDict": "Aus Wörterbuch hinzufügen",
+    "dict": "Wörterbuch",
+    "dictHint": "Mit einem Wörterbuch-Attribut verknüpft folgt der Parametername der Wörterbuch-Übersetzung je Sprache"
   },
   "show": {
     "sub": "Verkaufsargumente · Highlights · Anwendungen · Detail · FAQ",
@@ -736,7 +771,12 @@
     "videoNotFound": "Video nicht gefunden",
     "aiNoKey": "OPENROUTER_API_KEY nicht konfiguriert — KI nicht verfügbar",
     "aiEmpty": "KI lieferte eine leere Antwort",
-    "aiBadJson": "KI-Antwort war kein gültiges JSON"
+    "aiBadJson": "KI-Antwort war kein gültiges JSON",
+    "attrNotFound": "Attribut nicht gefunden oder gehört nicht zur aktuellen Fabrik",
+    "attrKeyRequired": "Attribut-Key ist erforderlich",
+    "attrKeyInvalid": "Ungültiger Key (beginnt mit Buchstabe; nur Buchstaben/Ziffern/Unterstrich)",
+    "attrKeyTaken": "Key „{key}“ existiert bereits",
+    "attrNameRequired": "Name ist erforderlich"
   },
   "gallery": {
     "zoom": "Bild vergrößern",

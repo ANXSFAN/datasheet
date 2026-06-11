@@ -9,7 +9,8 @@
       "rules": "Règles",
       "analytics": "Statistiques",
       "import": "Importer",
-      "factories": "Usines"
+      "factories": "Usines",
+      "attributes": "Attributs"
     },
     "common": {
       "save": "Enregistrer",
@@ -67,7 +68,9 @@
       "repModel": "Modèle",
       "repError": "Erreur",
       "factoryCount": "{n} usines — modifiez marque, contacts et couleur",
-      "factoryEmpty": "Aucune usine pour l'instant"
+      "factoryEmpty": "Aucune usine pour l'instant",
+      "attributes": "Dictionnaire d'attributs",
+      "attributesSub": "Clés d'attribut et noms en 9 langues unifiés : partagés par la compatibilité, les spécifications, l'IA et l'import"
     },
     "dashboard": {
       "last30": "30 derniers jours",
@@ -208,6 +211,35 @@
       "needTwoCats": "Les règles nécessitent au moins deux catégories (principale + accessoire). Créez d'abord votre arbre de catégories.",
       "savedOk": "Règle enregistrée",
       "appliedFail": "Échec"
+    },
+    "attr": {
+      "addTitle": "Nouvel attribut",
+      "keyLabel": "Clé (key)",
+      "keyPh": "cct / pcbWidth",
+      "keyHint": "Commence par une lettre ; lettres/chiffres/underscore uniquement. Non modifiable ensuite",
+      "nameLabel": "Nom (multilingue)",
+      "namePh": "Temperatura de color",
+      "nameHint": "Saisissez le nom source en espagnol (comme le contenu produit)",
+      "typeLabel": "Type",
+      "typeText": "Texte",
+      "typeNumber": "Nombre",
+      "typeSelect": "Options",
+      "unitLabel": "Unité",
+      "unitPh": "mm / V / W / K",
+      "optionsLabel": "Valeurs prédéfinies",
+      "optionsPh": "Saisir puis Entrée",
+      "optionsHint": "Valeurs physiques indépendantes de la langue, ex. 24V, IP65",
+      "create": "Créer",
+      "created": "Créé",
+      "saved": "Enregistré",
+      "translate": "Traduire par IA",
+      "translated": "Traductions générées",
+      "deleteConfirm": "Supprimer l'attribut « {name} » ? Les données déjà enregistrées sur les produits ne sont pas affectées ; seules les suggestions futures et les noms traduits le sont.",
+      "empty": "Pas encore d'attributs : préchargez les attributs LED courants ou créez-en un",
+      "seedDefaults": "Précharger les attributs courants",
+      "seeded": "{n} attributs courants préchargés",
+      "moveUp": "Monter",
+      "moveDown": "Descendre"
     }
   },
   "prod": {
@@ -275,7 +307,10 @@
     "statPdf": "Téléchargements PDF",
     "statConv": "Conversion téléchargement",
     "bySource": "Par source",
-    "directSource": "Direct / sans code canal"
+    "directSource": "Direct / sans code canal",
+    "fromDict": "Ajouter du dictionnaire",
+    "dict": "Dictionnaire",
+    "dictHint": "Lié à un attribut du dictionnaire, le nom du paramètre suit la traduction du dictionnaire selon la langue"
   },
   "show": {
     "sub": "Arguments · points forts · applications · détail · FAQ",
@@ -736,7 +771,12 @@
     "videoNotFound": "Vidéo introuvable",
     "aiNoKey": "OPENROUTER_API_KEY non configurée — IA indisponible",
     "aiEmpty": "L'IA a renvoyé une réponse vide",
-    "aiBadJson": "La réponse de l'IA n'est pas un JSON valide"
+    "aiBadJson": "La réponse de l'IA n'est pas un JSON valide",
+    "attrNotFound": "Attribut introuvable ou n'appartenant pas à l'usine actuelle",
+    "attrKeyRequired": "La clé de l'attribut est obligatoire",
+    "attrKeyInvalid": "Clé invalide (commence par une lettre ; lettres/chiffres/underscore uniquement)",
+    "attrKeyTaken": "La clé « {key} » existe déjà",
+    "attrNameRequired": "Le nom est obligatoire"
   },
   "gallery": {
     "zoom": "Agrandir l'image",

@@ -28,6 +28,7 @@ import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { normalizeSource } from "@/lib/channel";
+import { localizedName } from "@/lib/catalog";
 import {
   findPublicProductBySlug,
   findRelatedProducts,
@@ -171,8 +172,28 @@ export default async function ProductDatasheetPage({
   const tr = parseContentI18n(product.contentI18n)[locale];
 
   // 规格表显示用译文（数量一致才用，避免 AI 增删导致错位）
-  const displaySpecs =
+  const trSpecs =
     tr?.specs && tr.specs.length === specs.length ? tr.specs : specs;
+  // 字典译名 overlay：行挂字典 key（key 永远从源 specs 读）且字典命中 →
+  // label 用字典按当前语言的译名，优先级高于 contentI18n 译文；value/unit 不动。
+  const keyedRows = specs.some((s) => s.key);
+  const attrNameByKey = keyedRows
+    ? new Map(
+        (
+          await prisma.attributeDefinition.findMany({
+            where: { factoryId: product.factoryId },
+            select: { key: true, name: true, nameI18n: true },
+          })
+        ).map((d) => [d.key, localizedName(d.name, d.nameI18n, locale)]),
+      )
+    : new Map<string, string>();
+  const displaySpecs = keyedRows
+    ? trSpecs.map((row, i) => {
+        const key = specs[i]?.key;
+        const dictLabel = key ? attrNameByKey.get(key) : undefined;
+        return dictLabel ? { ...row, label: dictLabel } : row;
+      })
+    : trSpecs;
   const specGroups = groupSpecs(displaySpecs);
   // 参数可视化：用源识别、用译文展示（label 与 value 都随语言）。
   const specViz = buildSpecViz(

@@ -40,8 +40,31 @@ model Factory {
   categories       Category[]
   series           Series[]
   compatRules      CompatRule[]
+  attributes       AttributeDefinition[]
 
   @@map("factories")
+}
+
+/// 属性字典（per-factory）：统一 Product.attributes 的 key 命名、规格行(specs[].key)
+/// 的全局多语言名称，并为规则编辑器 / AI 抽取 / 导入提供 key 候选。
+/// options 为 select 型的预设值（语言无关物理值，如 "24V" / "IP65"），存 Json 不建子表。
+model AttributeDefinition {
+  id        String   @id @default(cuid())
+  factoryId String   @map("factory_id")
+  key       String // 机器 key：^[a-zA-Z][a-zA-Z0-9_]{0,39}$，如 pcbWidth / cct
+  name      String // 源语言（es）显示名，多语言回退
+  nameI18n  Json?    @map("name_i18n") // { en, zh, fr, ... } 其余语言译名，缺则回退 name
+  unit      String? // 默认单位（mm / V / W / K）；规格行带出后仍可改
+  type      String   @default("text") // text | number | select
+  options   Json? // type=select 时的候选值 string[]
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  factory   Factory  @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+
+  @@unique([factoryId, key])
+  @@index([factoryId])
+  @@map("attribute_definitions")
 }
 
 /// A product owned by this app's own database. Fully editable in the admin.

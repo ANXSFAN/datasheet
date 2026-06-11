@@ -9,7 +9,8 @@
       "rules": "Regole",
       "analytics": "Statistiche",
       "import": "Importa",
-      "factories": "Fabbriche"
+      "factories": "Fabbriche",
+      "attributes": "Attributi"
     },
     "common": {
       "save": "Salva",
@@ -67,7 +68,9 @@
       "repModel": "Modello",
       "repError": "Errore",
       "factoryCount": "{n} fabbriche: modifica marchio, contatti e colore",
-      "factoryEmpty": "Nessuna fabbrica ancora"
+      "factoryEmpty": "Nessuna fabbrica ancora",
+      "attributes": "Dizionario degli attributi",
+      "attributesSub": "Chiavi attributo e nomi in 9 lingue unificati: condivisi da abbinamento accessori, specifiche, IA e importazione"
     },
     "dashboard": {
       "last30": "Ultimi 30 giorni",
@@ -208,6 +211,35 @@
       "needTwoCats": "Le regole richiedono almeno due categorie (principale + accessorio). Crea prima il tuo albero categorie.",
       "savedOk": "Regola salvata",
       "appliedFail": "Operazione non riuscita"
+    },
+    "attr": {
+      "addTitle": "Nuovo attributo",
+      "keyLabel": "Chiave (key)",
+      "keyPh": "cct / pcbWidth",
+      "keyHint": "Inizia con una lettera; solo lettere/numeri/underscore. Non modificabile in seguito",
+      "nameLabel": "Nome (multilingue)",
+      "namePh": "Temperatura de color",
+      "nameHint": "Scrivi il nome sorgente in spagnolo (come il contenuto del prodotto)",
+      "typeLabel": "Tipo",
+      "typeText": "Testo",
+      "typeNumber": "Numero",
+      "typeSelect": "Opzioni",
+      "unitLabel": "Unità",
+      "unitPh": "mm / V / W / K",
+      "optionsLabel": "Valori predefiniti",
+      "optionsPh": "Scrivi e premi Invio",
+      "optionsHint": "Valori fisici indipendenti dalla lingua, es. 24V, IP65",
+      "create": "Crea",
+      "created": "Creato",
+      "saved": "Salvato",
+      "translate": "Traduci con IA",
+      "translated": "Traduzioni generate",
+      "deleteConfirm": "Eliminare l'attributo «{name}»? I dati già salvati sui prodotti non vengono toccati; riguarda solo i suggerimenti futuri e i nomi tradotti.",
+      "empty": "Ancora nessun attributo: precarica quelli LED comuni o creane uno",
+      "seedDefaults": "Precarica attributi comuni",
+      "seeded": "{n} attributi comuni precaricati",
+      "moveUp": "Sposta su",
+      "moveDown": "Sposta giù"
     }
   },
   "prod": {
@@ -275,7 +307,10 @@
     "statPdf": "Download PDF",
     "statConv": "Conversione download",
     "bySource": "Per origine",
-    "directSource": "Diretto / senza codice canale"
+    "directSource": "Diretto / senza codice canale",
+    "fromDict": "Aggiungi dal dizionario",
+    "dict": "Dizionario",
+    "dictHint": "Collegato a un attributo del dizionario, il nome del parametro usa la traduzione del dizionario per ogni lingua"
   },
   "show": {
     "sub": "Punti di forza · highlight · applicazioni · dettaglio · FAQ",
@@ -736,7 +771,12 @@
     "videoNotFound": "Video inesistente",
     "aiNoKey": "OPENROUTER_API_KEY non configurata: IA non disponibile",
     "aiEmpty": "L'IA ha restituito una risposta vuota",
-    "aiBadJson": "La risposta dell'IA non è JSON valido"
+    "aiBadJson": "La risposta dell'IA non è JSON valido",
+    "attrNotFound": "Attributo non trovato o non appartenente alla fabbrica corrente",
+    "attrKeyRequired": "La chiave dell'attributo è obbligatoria",
+    "attrKeyInvalid": "Chiave non valida (inizia con lettera; solo lettere/numeri/underscore)",
+    "attrKeyTaken": "La chiave «{key}» esiste già",
+    "attrNameRequired": "Il nome è obbligatorio"
   },
   "gallery": {
     "zoom": "Ingrandisci immagine",

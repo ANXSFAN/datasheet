@@ -73,12 +73,7 @@ export function PdfIntakeCard({
       case "certifications":
         return d.certifications.length ? d.certifications.join(" · ") : null;
       case "attributes": {
-        const a = d.attributes;
-        const parts = [
-          a.pcbWidth ? `PCB ${a.pcbWidth}` : null,
-          a.voltage ?? null,
-          a.watt != null ? `${a.watt}W` : null,
-        ].filter(Boolean);
+        const parts = Object.entries(d.attributes).map(([k, v]) => `${k}: ${v}`);
         return parts.length ? parts.join(" · ") : null;
       }
       case "highlights":

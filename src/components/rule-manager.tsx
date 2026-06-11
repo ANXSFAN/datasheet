@@ -58,7 +58,6 @@ const RELATIONS = [
   { v: "alternative" },
   { v: "required" },
 ];
-const ATTR_HINTS = ["pcbWidth", "voltage", "watt"];
 
 const inputCls =
   "rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-ink)]";
@@ -102,10 +101,13 @@ export function RuleManager({
   categories,
   rules,
   catNames,
+  attrOptions,
 }: {
   categories: Cat[];
   rules: Rule[];
   catNames: Record<string, string>;
+  /** 属性字典 key 候选（datalist）；存量规则的自由 key 仍可手输。 */
+  attrOptions: { key: string; label: string }[];
 }) {
   const router = useRouter();
   const t = useTranslations("admin");
@@ -197,6 +199,7 @@ export function RuleManager({
           key={editing === "new" ? "new" : editing.id}
           initial={editing === "new" ? { id: "", ...EMPTY } : editing}
           opts={opts}
+          attrOptions={attrOptions}
           onClose={() => setEditing(null)}
         />
       )}
@@ -273,10 +276,12 @@ export function RuleManager({
 function RuleEditor({
   initial,
   opts,
+  attrOptions,
   onClose,
 }: {
   initial: Rule;
   opts: { id: string; label: string }[];
+  attrOptions: { key: string; label: string }[];
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -351,8 +356,10 @@ function RuleEditor({
       </div>
 
       <datalist id="attr-hints">
-        {ATTR_HINTS.map((h) => (
-          <option key={h} value={h} />
+        {attrOptions.map((a) => (
+          <option key={a.key} value={a.key}>
+            {a.label}
+          </option>
         ))}
       </datalist>
 

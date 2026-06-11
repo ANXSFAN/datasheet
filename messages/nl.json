@@ -9,7 +9,8 @@
       "rules": "Regels",
       "analytics": "Statistieken",
       "import": "Importeren",
-      "factories": "Fabrieken"
+      "factories": "Fabrieken",
+      "attributes": "Attributen"
     },
     "common": {
       "save": "Opslaan",
@@ -67,7 +68,9 @@
       "repModel": "Model",
       "repError": "Fout",
       "factoryCount": "{n} fabrieken — merk, contact en kleur bewerken",
-      "factoryEmpty": "Nog geen fabrieken"
+      "factoryEmpty": "Nog geen fabrieken",
+      "attributes": "Attributenwoordenboek",
+      "attributesSub": "Uniforme attribuutsleutels en namen in 9 talen: gedeeld door accessoire-matching, specificaties, AI-invoer en import"
     },
     "dashboard": {
       "last30": "Laatste 30 dagen",
@@ -208,6 +211,35 @@
       "needTwoCats": "Regels vereisen minstens twee categorieën (hoofd + accessoire). Maak eerst je categorieboom.",
       "savedOk": "Regel opgeslagen",
       "appliedFail": "Mislukt"
+    },
+    "attr": {
+      "addTitle": "Nieuw attribuut",
+      "keyLabel": "Sleutel (key)",
+      "keyPh": "cct / pcbWidth",
+      "keyHint": "Begint met een letter; alleen letters/cijfers/underscore. Achteraf niet te wijzigen",
+      "nameLabel": "Naam (meertalig)",
+      "namePh": "Temperatura de color",
+      "nameHint": "Vul de bronnaam in het Spaans in (zoals de productbroninhoud)",
+      "typeLabel": "Type",
+      "typeText": "Tekst",
+      "typeNumber": "Getal",
+      "typeSelect": "Keuzelijst",
+      "unitLabel": "Eenheid",
+      "unitPh": "mm / V / W / K",
+      "optionsLabel": "Vooraf ingestelde waarden",
+      "optionsPh": "Typ en druk op Enter",
+      "optionsHint": "Taalonafhankelijke fysieke waarden, bijv. 24V, IP65",
+      "create": "Aanmaken",
+      "created": "Aangemaakt",
+      "saved": "Opgeslagen",
+      "translate": "AI-vertaling",
+      "translated": "Vertalingen gegenereerd",
+      "deleteConfirm": "Attribuut '{name}' verwijderen? Al opgeslagen productgegevens blijven intact; alleen toekomstige suggesties en vertaalde namen worden beïnvloed.",
+      "empty": "Nog geen attributen – vul gangbare led-attributen vooraf in of maak er een aan",
+      "seedDefaults": "Gangbare attributen vooraf invullen",
+      "seeded": "{n} gangbare attributen vooraf ingevuld",
+      "moveUp": "Omhoog",
+      "moveDown": "Omlaag"
     }
   },
   "prod": {
@@ -275,7 +307,10 @@
     "statPdf": "PDF-downloads",
     "statConv": "Downloadconversie",
     "bySource": "Per bron",
-    "directSource": "Direct / zonder kanaalcode"
+    "directSource": "Direct / zonder kanaalcode",
+    "fromDict": "Toevoegen uit woordenboek",
+    "dict": "Woordenboek",
+    "dictHint": "Gekoppeld aan een woordenboekattribuut volgt de parameternaam de woordenboekvertaling per taal"
   },
   "show": {
     "sub": "Verkooppunten · highlights · toepassingen · detail · FAQ",
@@ -736,7 +771,12 @@
     "videoNotFound": "Video niet gevonden",
     "aiNoKey": "OPENROUTER_API_KEY niet geconfigureerd — AI niet beschikbaar",
     "aiEmpty": "AI gaf een leeg antwoord terug",
-    "aiBadJson": "AI-antwoord was geen geldige JSON"
+    "aiBadJson": "AI-antwoord was geen geldige JSON",
+    "attrNotFound": "Attribuut niet gevonden of hoort niet bij de huidige fabriek",
+    "attrKeyRequired": "Attribuutsleutel is verplicht",
+    "attrKeyInvalid": "Ongeldige sleutel (begint met een letter; alleen letters/cijfers/underscore)",
+    "attrKeyTaken": "Sleutel '{key}' bestaat al",
+    "attrNameRequired": "Naam is verplicht"
   },
   "gallery": {
     "zoom": "Afbeelding vergroten",

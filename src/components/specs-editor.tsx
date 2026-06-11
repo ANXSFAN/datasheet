@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Trash2, ArrowUp, ArrowDown, X } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, X, BookMarked } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { saveProductSpecs } from "@/app/admin/products/actions";
+import type { AttrDefLite } from "@/lib/attribute-defaults";
 
-type SpecRow = { group: string; label: string; value: string; unit: string };
+type SpecRow = { group: string; label: string; value: string; unit: string; key: string };
 
 const inputCls =
   "w-full rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-ink)]";
@@ -18,22 +19,55 @@ export function SpecsEditor({
   productId,
   initialSpecs,
   initialCerts,
+  attrDefs,
 }: {
   productId: string;
   initialSpecs: SpecRow[];
   initialCerts: string[];
+  attrDefs: AttrDefLite[];
 }) {
   const t = useTranslations();
   const [rows, setRows] = useState<SpecRow[]>(initialSpecs);
   const [certs, setCerts] = useState<string[]>(initialCerts);
   const [certDraft, setCertDraft] = useState("");
   const [pending, start] = useTransition();
+  const defByKey = new Map(attrDefs.map((d) => [d.key, d]));
 
   function addRow() {
     setRows((r) => [
       ...r,
-      { group: r.length ? r[r.length - 1].group : "", label: "", value: "", unit: "" },
+      { group: r.length ? r[r.length - 1].group : "", label: "", value: "", unit: "", key: "" },
     ]);
+  }
+
+  /** 从字典追加一行：label 统一写源语言名（与产品源 specs 语言一致），unit 带默认。 */
+  function addFromDict(key: string) {
+    const def = defByKey.get(key);
+    if (!def) return;
+    setRows((r) => [
+      ...r,
+      {
+        group: r.length ? r[r.length - 1].group : "",
+        label: def.srcName,
+        value: "",
+        unit: def.unit,
+        key: def.key,
+      },
+    ]);
+  }
+
+  /** 行级认领 / 解除：选中字典项时用字典源名覆盖参数名、补默认单位；清空则解除关联。 */
+  function linkRow(i: number, key: string) {
+    const def = key ? defByKey.get(key) : undefined;
+    setRows((r) =>
+      r.map((x, j) =>
+        j === i
+          ? def
+            ? { ...x, key: def.key, label: def.srcName, unit: x.unit || def.unit }
+            : { ...x, key: "" }
+          : x,
+      ),
+    );
   }
   function updateRow(i: number, patch: Partial<SpecRow>) {
     setRows((r) => r.map((x, j) => (j === i ? { ...x, ...patch } : x)));
@@ -68,6 +102,7 @@ export function SpecsEditor({
         label: r.label.trim(),
         value: r.value.trim(),
         unit: r.unit.trim() || undefined,
+        key: r.key || undefined,
       }))
       .filter((r) => r.label && r.value);
     start(async () => {
@@ -97,15 +132,36 @@ export function SpecsEditor({
 
       {/* 规格参数 */}
       <div className="mt-5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <label className={labelCls}>{t("prod.params")}</label>
-          <button
-            type="button"
-            onClick={addRow}
-            className="flex items-center gap-1 font-mono text-[11px] text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
-          >
-            <Plus className="h-3.5 w-3.5" /> {t("prod.addParam")}
-          </button>
+          <div className="flex items-center gap-3">
+            {attrDefs.length > 0 && (
+              <div className="flex items-center gap-1 text-[var(--color-ink-muted)]">
+                <BookMarked className="h-3.5 w-3.5" />
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) addFromDict(e.target.value);
+                  }}
+                  className="max-w-44 cursor-pointer bg-transparent font-mono text-[11px] text-[var(--color-ink-muted)] outline-none transition hover:text-[var(--color-ink)]"
+                >
+                  <option value="">{t("prod.fromDict")}</option>
+                  {attrDefs.map((d) => (
+                    <option key={d.key} value={d.key}>
+                      {d.label} · {d.key}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={addRow}
+              className="flex items-center gap-1 font-mono text-[11px] text-[var(--color-ink-muted)] transition hover:text-[var(--color-ink)]"
+            >
+              <Plus className="h-3.5 w-3.5" /> {t("prod.addParam")}
+            </button>
+          </div>
         </div>
 
         {rows.length === 0 ? (
@@ -120,9 +176,14 @@ export function SpecsEditor({
               <span className={`${labelCls} w-40 shrink-0`}>{t("prod.paramName")}</span>
               <span className={`${labelCls} flex-1`}>{t("prod.paramValue")}</span>
               <span className={`${labelCls} w-20 shrink-0`}>{t("prod.unit")}</span>
+              <span className={`${labelCls} w-28 shrink-0`} title={t("prod.dictHint")}>
+                {t("prod.dict")}
+              </span>
               <span className="w-16 shrink-0" />
             </div>
-            {rows.map((r, i) => (
+            {rows.map((r, i) => {
+              const def = r.key ? defByKey.get(r.key) : undefined;
+              return (
               <div key={i} className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
                 <input
                   value={r.group}
@@ -134,20 +195,52 @@ export function SpecsEditor({
                   value={r.label}
                   onChange={(e) => updateRow(i, { label: e.target.value })}
                   placeholder={t("prod.paramName")}
-                  className={`${inputBase} w-40 shrink-0`}
+                  disabled={!!def}
+                  title={def ? t("prod.dictHint") : undefined}
+                  className={`${inputBase} w-40 shrink-0 ${def ? "bg-[var(--color-surface-sunken)] text-[var(--color-ink-soft)]" : ""}`}
                 />
                 <input
                   value={r.value}
                   onChange={(e) => updateRow(i, { value: e.target.value })}
                   placeholder={t("prod.paramValue")}
+                  inputMode={def?.type === "number" ? "decimal" : undefined}
+                  list={
+                    def?.type === "select" && def.options.length
+                      ? `spec-opt-${def.key}`
+                      : undefined
+                  }
                   className={inputCls}
                 />
+                {def?.type === "select" && def.options.length > 0 && (
+                  <datalist id={`spec-opt-${def.key}`}>
+                    {def.options.map((o) => (
+                      <option key={o} value={o} />
+                    ))}
+                  </datalist>
+                )}
                 <input
                   value={r.unit}
                   onChange={(e) => updateRow(i, { unit: e.target.value })}
                   placeholder={t("prod.unit")}
                   className={`${inputBase} w-20 shrink-0`}
                 />
+                <select
+                  value={r.key}
+                  onChange={(e) => linkRow(i, e.target.value)}
+                  title={def ? `${def.label} · ${def.key}` : t("prod.dictHint")}
+                  className={`${inputBase} w-28 shrink-0 font-mono text-[11px] ${r.key ? "" : "text-[var(--color-ink-faint)]"}`}
+                >
+                  <option value="">—</option>
+                  {attrDefs.map((d) => (
+                    <option key={d.key} value={d.key}>
+                      {d.key}
+                    </option>
+                  ))}
+                  {/* 字典已删但行还挂着的 key：保留可见，可手动解除 */}
+                  {r.key && !defByKey.has(r.key) && (
+                    <option value={r.key}>{r.key}</option>
+                  )}
+                </select>
                 <div className="flex shrink-0 items-center">
                   <button
                     type="button"
@@ -177,7 +270,8 @@ export function SpecsEditor({
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

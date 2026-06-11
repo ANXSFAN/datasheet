@@ -9,7 +9,8 @@
       "rules": "Rules",
       "analytics": "Analytics",
       "import": "Import",
-      "factories": "Factories"
+      "factories": "Factories",
+      "attributes": "Attributes"
     },
     "common": {
       "save": "Save",
@@ -67,7 +68,9 @@
       "repModel": "Model",
       "repError": "Error",
       "factoryCount": "{n} factories — edit brand, contacts and theme color",
-      "factoryEmpty": "No factories yet"
+      "factoryEmpty": "No factories yet",
+      "attributes": "Attribute dictionary",
+      "attributesSub": "Unified attribute keys and 9-language names, shared by accessory matching, spec tables, AI intake and bulk import"
     },
     "dashboard": {
       "last30": "Last 30 days",
@@ -208,6 +211,35 @@
       "needTwoCats": "Rules need at least two categories (main + accessory). Create your category tree first.",
       "savedOk": "Rule saved",
       "appliedFail": "Failed"
+    },
+    "attr": {
+      "addTitle": "New attribute",
+      "keyLabel": "Key",
+      "keyPh": "cct / pcbWidth",
+      "keyHint": "Starts with a letter; letters/digits/underscore only. Cannot be changed later",
+      "nameLabel": "Name (multilingual)",
+      "namePh": "Temperatura de color",
+      "nameHint": "Write the source name in Spanish (same as product source content)",
+      "typeLabel": "Type",
+      "typeText": "Text",
+      "typeNumber": "Number",
+      "typeSelect": "Select",
+      "unitLabel": "Unit",
+      "unitPh": "mm / V / W / K",
+      "optionsLabel": "Preset options",
+      "optionsPh": "Type and press Enter",
+      "optionsHint": "Language-independent physical values, e.g. 24V, IP65",
+      "create": "Create",
+      "created": "Created",
+      "saved": "Saved",
+      "translate": "AI translate",
+      "translated": "Translations generated",
+      "deleteConfirm": "Delete attribute “{name}”? Data already saved on products is not affected; only future suggestions and translated names are.",
+      "empty": "No attributes yet — preset common LED attributes or create one",
+      "seedDefaults": "Preset common attributes",
+      "seeded": "{n} common attributes preset",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     }
   },
   "prod": {
@@ -275,7 +307,10 @@
     "statPdf": "PDF downloads",
     "statConv": "Download conversion",
     "bySource": "By source",
-    "directSource": "Direct / no channel code"
+    "directSource": "Direct / no channel code",
+    "fromDict": "Add from dictionary",
+    "dict": "Dictionary",
+    "dictHint": "When linked to a dictionary attribute, the parameter name uses the dictionary translation for each language"
   },
   "show": {
     "sub": "Selling points · highlights · applications · long detail · FAQ",
@@ -736,7 +771,12 @@
     "videoNotFound": "Video not found",
     "aiNoKey": "OPENROUTER_API_KEY is not configured — AI is unavailable",
     "aiEmpty": "AI returned an empty response",
-    "aiBadJson": "AI response was not valid JSON"
+    "aiBadJson": "AI response was not valid JSON",
+    "attrNotFound": "Attribute not found or not owned by the current factory",
+    "attrKeyRequired": "Attribute key is required",
+    "attrKeyInvalid": "Invalid key (must start with a letter; letters/digits/underscore only)",
+    "attrKeyTaken": "Key “{key}” already exists",
+    "attrNameRequired": "Name is required"
   },
   "gallery": {
     "zoom": "Zoom image",
