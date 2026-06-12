@@ -5,6 +5,7 @@ import {
   DeleteObjectCommand,
   CopyObjectCommand,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const accountId = process.env.R2_ACCOUNT_ID;
 
@@ -36,6 +37,23 @@ export async function uploadToR2(
     }),
   );
   return `${PUBLIC_URL}/${key}`;
+}
+
+/**
+ * 浏览器直传用的预签名 PUT URL。文件本体不经过我们的服务器——
+ * Vercel 函数请求体有 4.5MB 硬上限，大文件（如技术文档 PDF）只能直传 R2。
+ * ContentType 参与签名，前端 PUT 时必须带相同的 Content-Type 头。
+ */
+export async function presignR2Put(
+  key: string,
+  contentType: string,
+): Promise<{ uploadUrl: string; url: string }> {
+  const uploadUrl = await getSignedUrl(
+    r2,
+    new PutObjectCommand({ Bucket: BUCKET, Key: key, ContentType: contentType }),
+    { expiresIn: 600 },
+  );
+  return { uploadUrl, url: `${PUBLIC_URL}/${key}` };
 }
 
 /** URL 是否在本桶公开域名下——服务端按 URL 回读文件前的 SSRF 防线。 */

@@ -29,6 +29,7 @@ import {
   duplicateProduct,
 } from "@/app/admin/products/actions";
 import { createProductFromPdf } from "@/app/admin/products/pdf-actions";
+import { uploadDirect } from "@/lib/upload-direct";
 import {
   assignProductsToCategory,
   assignProductsToSeries,
@@ -631,22 +632,17 @@ function NewProductForm({
     }
     setPdfBusy(true);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      if (!res.ok) {
-        const msg = await res.json().catch(() => null);
-        throw new Error(msg?.error ?? tp("extractFail"));
-      }
-      const { url } = (await res.json()) as { url: string };
-      const id = await createProductFromPdf({
+      // 直传 R2:PDF 常超过 Vercel 函数 4.5MB 请求体上限,不能走 /api/upload
+      const url = await uploadDirect(file);
+      const r = await createProductFromPdf({
         pdfUrl: url,
         fileName: file.name,
         categoryId,
         seriesId,
       });
+      if (!r.ok) throw new Error(r.error);
       toast.success(tp("createdOk"));
-      router.push(`/admin/products/${id}`);
+      router.push(`/admin/products/${r.data}`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : tp("extractFail"));
       setPdfBusy(false);

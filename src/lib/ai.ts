@@ -37,6 +37,14 @@ export async function openRouterJSONRich(
   if (!apiKey) throw await adminErr("aiNoKey");
   const model = process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4.5";
 
+  // 消息里带 PDF 时按 OPENROUTER_PDF_ENGINE 指定解析引擎：
+  // 模型不原生支持文件输入（如 Qwen-VL）必须配；扫描/图片排版的 PDF 用
+  // mistral-ocr（按页计费），纯文本 PDF 可用免费的 pdf-text。不配则保持原生。
+  const hasFile = messages.some(
+    (m) => Array.isArray(m.content) && m.content.some((p) => p.type === "file"),
+  );
+  const pdfEngine = process.env.OPENROUTER_PDF_ENGINE;
+
   const res = await fetch(OPENROUTER_URL, {
     method: "POST",
     headers: {
@@ -49,6 +57,9 @@ export async function openRouterJSONRich(
       messages,
       temperature: opts?.temperature ?? 0.7,
       response_format: { type: "json_object" },
+      ...(hasFile && pdfEngine
+        ? { plugins: [{ id: "file-parser", pdf: { engine: pdfEngine } }] }
+        : {}),
     }),
   });
 

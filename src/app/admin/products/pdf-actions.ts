@@ -34,6 +34,22 @@ import { createProduct } from "./actions";
  * 严禁编造数字 / 认证 / 尺寸（对齐 PLAN.md §7 与 generateShowcaseDraft 的约束）。
  */
 
+/**
+ * 动作结果：错误以数据返回而不是 throw。生产构建里 Server Action 抛出的
+ * Error 会被 Next.js 掩码成 "An error occurred in the Server Components
+ * render…"，客户永远看不到 adminErr 的本地化文案；只有返回值能原样到达前端。
+ */
+export type PdfActionResult<T> = { ok: true; data: T } | { ok: false; error: string };
+
+async function guarded<T>(label: string, fn: () => Promise<T>): Promise<PdfActionResult<T>> {
+  try {
+    return { ok: true, data: await fn() };
+  } catch (e) {
+    console.error(`[pdf-intake] ${label} failed:`, e);
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 /** 登录 + 选中工厂校验（与 actions.ts 同约定）。 */
 async function authedFactory() {
   const session = await auth();
@@ -273,11 +289,13 @@ async function extractDraft(
 export async function extractProductFromPdf(input: {
   pdfUrl: string;
   fileName?: string;
-}): Promise<PdfDraft> {
-  const factory = await authedFactory();
-  const attrDefs = await listAttributes(factory.id);
-  const bytes = await fetchPdfBytes(input.pdfUrl);
-  return extractDraft(bytes, input.fileName ?? "datasheet.pdf", attrDefs);
+}): Promise<PdfActionResult<PdfDraft>> {
+  return guarded("extract", async () => {
+    const factory = await authedFactory();
+    const attrDefs = await listAttributes(factory.id);
+    const bytes = await fetchPdfBytes(input.pdfUrl);
+    return extractDraft(bytes, input.fileName ?? "datasheet.pdf", attrDefs);
+  });
 }
 
 /**
@@ -285,6 +303,14 @@ export async function extractProductFromPdf(input: {
  * attributes 与现有合并（PDF 没写的属性不清掉），其余字段组整组覆盖。
  */
 export async function applyProductPdfDraft(input: {
+  productId: string;
+  draft: unknown;
+  fields: PdfDraftField[];
+}): Promise<PdfActionResult<{ applied: number }>> {
+  return guarded("apply", () => applyDraft(input));
+}
+
+async function applyDraft(input: {
   productId: string;
   draft: unknown;
   fields: PdfDraftField[];
@@ -361,25 +387,27 @@ export async function createProductFromPdf(input: {
   fileName?: string;
   categoryId?: string | null;
   seriesId?: string | null;
-}): Promise<string> {
-  const factory = await authedFactory();
-  const attrDefs = await listAttributes(factory.id);
-  const bytes = await fetchPdfBytes(input.pdfUrl);
-  const draft = await extractDraft(bytes, input.fileName ?? "datasheet.pdf", attrDefs);
+}): Promise<PdfActionResult<string>> {
+  return guarded("create", async () => {
+    const factory = await authedFactory();
+    const attrDefs = await listAttributes(factory.id);
+    const bytes = await fetchPdfBytes(input.pdfUrl);
+    const draft = await extractDraft(bytes, input.fileName ?? "datasheet.pdf", attrDefs);
 
-  if (!draft.modelNumber) {
-    throw await adminErr("pdfNoModel");
-  }
-  const id = await createProduct({
-    name: draft.name ?? draft.modelNumber,
-    modelNumber: draft.modelNumber,
-    categoryId: input.categoryId,
-    seriesId: input.seriesId,
+    if (!draft.modelNumber) {
+      throw await adminErr("pdfNoModel");
+    }
+    const id = await createProduct({
+      name: draft.name ?? draft.modelNumber,
+      modelNumber: draft.modelNumber,
+      categoryId: input.categoryId,
+      seriesId: input.seriesId,
+    });
+    await applyDraft({
+      productId: id,
+      draft,
+      fields: ALL_FIELDS.filter((f) => f !== "basics"),
+    });
+    return id;
   });
-  await applyProductPdfDraft({
-    productId: id,
-    draft,
-    fields: ALL_FIELDS.filter((f) => f !== "basics"),
-  });
-  return id;
 }

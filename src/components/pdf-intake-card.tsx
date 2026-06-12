@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { FileText, Loader2, Sparkles, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useFileDrop } from "@/components/use-file-drop";
+import { uploadDirect } from "@/lib/upload-direct";
 import {
   extractProductFromPdf,
   applyProductPdfDraft,
@@ -108,20 +109,16 @@ export function PdfIntakeCard({
     }
     setPhase({ step: "uploading" });
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      if (!res.ok) {
-        const msg = await res.json().catch(() => null);
-        throw new Error(msg?.error ?? t("extractFail"));
-      }
-      const { url } = (await res.json()) as { url: string };
+      // 直传 R2:PDF 常超过 Vercel 函数 4.5MB 请求体上限,不能走 /api/upload
+      const url = await uploadDirect(file);
 
       setPhase({ step: "extracting" });
-      const draft = await extractProductFromPdf({
+      const r = await extractProductFromPdf({
         pdfUrl: url,
         fileName: file.name,
       });
+      if (!r.ok) throw new Error(r.error);
+      const draft = r.data;
       const present = FIELD_ORDER.filter((f) => summary(draft, f) !== null);
       if (!present.length) {
         toast.error(t("nothing"));
@@ -165,7 +162,8 @@ export function PdfIntakeCard({
           draft,
           fields: [...checked],
         });
-        toast.success(t("appliedOk", { n: r.applied }));
+        if (!r.ok) throw new Error(r.error);
+        toast.success(t("appliedOk", { n: r.data.applied }));
         // 编辑器初值在 useState 里，必须整页重载才能看到新内容
         window.location.reload();
       } catch (e) {
